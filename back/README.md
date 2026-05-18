@@ -17,7 +17,8 @@
   "username": "new_user",
   "password": "my_password",
   "display_name": "New User"
-}```
+}
+```
 *Выходные данные (201):*
 ```json
 {"message": "Пользователь зарегистрирован"}
