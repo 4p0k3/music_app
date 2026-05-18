@@ -1,0 +1,37 @@
+header{
+    background-color: white;
+    width: 100%;
+    border-radius: 0px 0px 16px 16px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+    
+}
+.headerSearch{
+    width: 680px;
+    height: 60px;
+}
+.HeaderContent{
+    border-bottom: 3px solid #E8E8E8;
+    width: 1200px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    align-items: center;
+    padding: 8px 0;
+    margin: 0 20px;
+    
+}
+
+.headerLogo{
+   cursor: pointer;
+    width: 235px;         /* Уменьшаем ширину, чтобы логотип стал аккуратнее */
+    height: auto;         /* Разрешаем браузеру самому считать высоту */
+    box-sizing: content-box;
+}
+
+nav{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    border-radius: 0px 0px 16px 16px;
+}

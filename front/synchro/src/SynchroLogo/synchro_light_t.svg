@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 254.61 63.41">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: #a55fa2;
+      }
+
+      .cls-1, .cls-2, .cls-3, .cls-4, .cls-5, .cls-6 {
+        font-family: LTSuperior-Black, 'LT Superior';
+        font-size: 48.85px;
+        font-weight: 800;
+      }
+
+      .cls-2 {
+        fill: #8ebf22;
+      }
+
+      .cls-7 {
+        letter-spacing: -.04em;
+      }
+
+      .cls-3 {
+        fill: #454545;
+      }
+
+      .cls-4 {
+        fill: #ffdd34;
+      }
+
+      .cls-5 {
+        fill: #4a5da8;
+      }
+
+      .cls-6 {
+        fill: #e83b3b;
+      }
+
+      .cls-8 {
+        letter-spacing: 0em;
+      }
+    </style>
+  </defs>
+  <text class="cls-1" transform="translate(14.18 39.1) scale(.94) skewX(-19.65)"><tspan class="cls-7" x="0" y="0">S</tspan><tspan x="30.09" y="0">YNCH</tspan><tspan class="cls-8" x="169.93" y="0">R</tspan><tspan x="200.61" y="0">O</tspan></text>
+  <text class="cls-5" transform="translate(13.77 39.17) scale(.94) skewX(-19.65)"><tspan class="cls-7" x="0" y="0">S</tspan><tspan x="30.09" y="0">YNCH</tspan><tspan class="cls-8" x="169.93" y="0">R</tspan><tspan x="200.61" y="0">O</tspan></text>
+  <text class="cls-2" transform="translate(12.26 39.1) scale(.94) skewX(-19.65)"><tspan class="cls-7" x="0" y="0">S</tspan><tspan x="30.09" y="0">YNCH</tspan><tspan class="cls-8" x="169.93" y="0">R</tspan><tspan x="200.61" y="0">O</tspan></text>
+  <text class="cls-4" transform="translate(11.04 39.1) scale(.94) skewX(-19.65)"><tspan class="cls-7" x="0" y="0">S</tspan><tspan x="30.09" y="0">YNCH</tspan><tspan class="cls-8" x="169.93" y="0">R</tspan><tspan x="200.61" y="0">O</tspan></text>
+  <text class="cls-6" transform="translate(9.89 39.1) scale(.94) skewX(-19.65)"><tspan class="cls-7" x="0" y="0">S</tspan><tspan x="30.09" y="0">YNCH</tspan><tspan class="cls-8" x="169.93" y="0">R</tspan><tspan x="200.61" y="0">O</tspan></text>
+  <text class="cls-3" transform="translate(8.66 39.1) scale(.94) skewX(-19.65)"><tspan class="cls-7" x="0" y="0">S</tspan><tspan x="30.09" y="0">YNCH</tspan><tspan class="cls-8" x="169.93" y="0">R</tspan><tspan x="200.61" y="0">O</tspan></text>
+</svg>
