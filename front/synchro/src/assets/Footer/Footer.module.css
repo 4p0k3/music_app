@@ -1,0 +1,17 @@
+.footerContainer{
+     padding: 16px;
+    color: white;
+    background-color: #454545;
+    width: 1240px;
+    margin: 0 auto; 
+    
+    border-radius: 16px 16px 0 0;
+    box-sizing: border-box; /* Чтобы padding не раздувал ширину */
+}
+.footerWrapper{
+    display: flex;
+    flex-direction: row;
+    justify-content: stretch;
+    align-items: end;
+    height: 100%;
+}

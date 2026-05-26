@@ -1,33 +1,13 @@
 import style from './TextArea.module.css';
 
-
-function TextArea({children, type="content"}){
-    let TextAreaType = type;
-    let TextAreaFontSize = "18px"
-
-
-    switch(TextArea){
-
-        case "content":
-            TextAreaFontSize = "18px";
-            break;
-        case "header":
-            TextAreaFontSize = "24px";
-            break;
-    }
+function TextArea({children, className, onClick}){
     return(
-            <div className={style.PostContainer}>
-
-                    <p style = {{fontSize: TextAreaFontSize}} className={style.TextAreaContent}>
-                        {children}
-                    </p>
-                    
-                </div>
+        <div className={style.TextArea} onClick={onClick}>
+            <div className={className}>
+                {children}
             </div>
-            
-
-        
-        );
+        </div>            
+);
     
 
 }

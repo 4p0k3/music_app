@@ -64,6 +64,7 @@ function Header(){
         <SignInModal label="Регистрация" onClose={modalRegistrationPopupClose}>
         <div className={signInModalStyle.inputContainer}>
             <InputField placeholder="Логин"/>
+            <InputField placeholder="Отображаемое имя"/>
             <InputField placeholder="Пароль"/>
         </div>
         <MainButton callback={modalRegistrationPopupClose} text="Регистраиця" type="main"/>

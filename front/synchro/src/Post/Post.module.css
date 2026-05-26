@@ -1,12 +1,67 @@
-.PostPicture{
-    width: 350px;
-    height: auto;
-    border-radius: 16px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+main{
+    color:#454545;
+}
+
+.HeaderContent{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: start;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.PostHeader{
+    display: flex;
+    flex-wrap: wrap;
+    font-size: 24px;
+    font-weight: bolder;
+    max-width: 100%;
+    word-break: break-all; 
+    overflow-wrap: anywhere;
+    line-clamp: 4;
+}
+.PostUser{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+}
+.PostUserText{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: start;
+}
+.PostDateAndUser{
+    font-size: 18px;
+    color: #696969;
+    font-weight: normal;
+}
+.PostUserPfp{
+    height: 72px;
+    width: 72px;
+    border-radius: 10000px;
 
 }
-.PostUserProfile{
-    height: 64px;
-    width: 64px;
-    border-radius: 1000px;
+.PostImage{
+
+    max-width: 500px;
+    max-height: 400px;
+    border-radius: 16px;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
+}
+.HeaderInfo{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+    justify-content: space-between;
+    gap: 20px;
+}
+.PostText{
+    font-size: 20px;
+    line-height: 28px;
+
 }

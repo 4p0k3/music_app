@@ -4,6 +4,7 @@ import Header from '../Header/Header'
 import Main from '../Main/Main'
 import InfoArea from '../InfoArea/InfoArea'
 import PostsItem from '../PostsItem/PostsItem'
+import Footer from '../assets/Footer/Footer'
 
 function AllPosts() {
   const lorem = "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.";
@@ -24,6 +25,7 @@ function AllPosts() {
 
       </InfoArea>
     </Main>
+    <Footer/>
     </>
   );
 }
