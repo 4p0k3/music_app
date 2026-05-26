@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     username TEXT UNIQUE NOT NULL,
     display_name TEXT NOT NULL,
-    avatar_url TEXT,
+    avatar_url TEXT, -- Сюда сохраняется путь к аватарке (/view/avatar_...)
     password_hash TEXT NOT NULL,
     api_token TEXT UNIQUE,
     role_id INTEGER NOT NULL DEFAULT 1,
@@ -38,6 +38,8 @@ CREATE TABLE IF NOT EXISTS posts (
     author_id INTEGER NOT NULL,
     title TEXT NOT NULL,
     content TEXT NOT NULL,
+    genre TEXT, -- ДОБАВЛЕНО: Жанр/категория поста
+    image_path TEXT, -- ДОБАВЛЕНО: Путь к прикрепленному изображению (/view/post_...)
     status_id INTEGER NOT NULL,
     likes_count INTEGER DEFAULT 0,
     comments_count INTEGER DEFAULT 0,
@@ -87,7 +89,7 @@ CREATE TABLE IF NOT EXISTS post_moderation (
 INSERT OR IGNORE INTO roles (id, name) VALUES (1, 'user'), (2, 'moderator'), (3, 'admin');
 INSERT OR IGNORE INTO post_statuses (id, name) VALUES (1, 'pending'), (2, 'approved'), (3, 'rejected');
 
--- Индексы
+-- Индексы для оптимизации запросов и пагинации
 CREATE INDEX IF NOT EXISTS idx_users_username ON users (username);
 CREATE INDEX IF NOT EXISTS idx_posts_author_id ON posts (author_id);
 CREATE INDEX IF NOT EXISTS idx_posts_status_id_created_at_desc ON posts (status_id, created_at DESC);
@@ -99,8 +101,8 @@ INSERT OR IGNORE INTO users (id, username, display_name, password_hash, role_id)
     (1, 'audiophile99', 'Alex', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1), -- Пароль: password
     (2, 'basshead', 'Max', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
 
-INSERT OR IGNORE INTO posts (id, author_id, title, content, status_id, likes_count, comments_count) VALUES 
-    (1, 1, 'Настройка ViPER4Android', 'Ребят, кто как настраивает ViPER4Android для наушников KZ? Пытаюсь выжать максимум из звучания.', 2, 1, 1);
+INSERT OR IGNORE INTO posts (id, author_id, title, content, genre, image_path, status_id, likes_count, comments_count) VALUES 
+    (1, 1, 'Настройка ViPER4Android', 'Ребят, кто как настраивает ViPER4Android для наушников KZ? Пытаюсь выжать максимум из звучания.', 'Audio', NULL, 2, 1, 1);
 
 INSERT OR IGNORE INTO comments (post_id, author_id, content) VALUES 
     (1, 2, 'Попробуй пресеты для Poweramp, звучит намного чище и бас плотнее.');
