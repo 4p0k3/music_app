@@ -1,4 +1,10 @@
 <?php
+// Маршрутизация статики при запуске через php -S
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (php_sapi_name() === 'cli-server' && is_file(__DIR__ . $uri)) {
+    return false;
+}
+
 header("Content-Type: application/json; charset=UTF-8");
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, DELETE, OPTIONS");
@@ -35,9 +41,9 @@ function response($data, $status = 200) {
 
 function getAuthUser($pdo) {
     $headers = getallheaders();
-    $auth = $headers['Authorization'] ?? '';
+    $auth = $headers['Authorization'] ?? $headers['authorization'] ?? '';
     if (preg_match('/Bearer\s(\S+)/', $auth, $matches)) {
-        $stmt = $pdo->prepare("SELECT * FROM users WHERE api_token = ? LIMIT 1");
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE api_token = ? AND is_banned = 0 AND deleted_at IS NULL LIMIT 1");
         $stmt->execute([$matches[1]]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -46,16 +52,14 @@ function getAuthUser($pdo) {
 
 function requireAuth($pdo) {
     $user = getAuthUser($pdo);
-    if (!$user) response(["error" => "Необходима авторизация"], 401);
+    if (!$user) response(["error" => "Необходима авторизация или ваш аккаунт заблокирован"], 401);
     return $user;
 }
 
 // 3. Роутинг
 $method = $_SERVER['REQUEST_METHOD'];
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
 
-// Убираем возможный базовый путь, если проект в подпапке
 $basePath = '/api'; 
 if (strpos($uri, $basePath) === 0) {
     $uri = substr($uri, strlen($basePath));
@@ -65,13 +69,17 @@ if (strpos($uri, $basePath) === 0) {
 
 // Регистрация
 if ($method === 'POST' && $uri === '/register') {
-    if (empty($input['username']) || empty($input['password']) || empty($input['display_name'])) {
+    $username = trim($input['username'] ?? '');
+    $displayName = trim($input['display_name'] ?? '');
+    $password = $input['password'] ?? '';
+
+    if (empty($username) || empty($password) || empty($displayName)) {
         response(["error" => "Заполните все поля"], 400);
     }
-    $hash = password_hash($input['password'], PASSWORD_DEFAULT);
+    $hash = password_hash($password, PASSWORD_DEFAULT);
     try {
         $stmt = $pdo->prepare("INSERT INTO users (username, display_name, password_hash) VALUES (?, ?, ?)");
-        $stmt->execute([$input['username'], $input['display_name'], $hash]);
+        $stmt->execute([$username, $displayName, $hash]);
         response(["message" => "Пользователь зарегистрирован"], 201);
     } catch (PDOException $e) {
         response(["error" => "Пользователь уже существует"], 409);
@@ -80,11 +88,17 @@ if ($method === 'POST' && $uri === '/register') {
 
 // Авторизация
 if ($method === 'POST' && $uri === '/login') {
-    $stmt = $pdo->prepare("SELECT id, password_hash FROM users WHERE username = ?");
-    $stmt->execute([$input['username'] ?? '']);
-    $user = $stmt->fetch();
+    $username = trim($input['username'] ?? '');
+    $password = $input['password'] ?? '';
 
-    if ($user && password_verify($input['password'] ?? '', $user['password_hash'])) {
+    $stmt = $pdo->prepare("SELECT id, password_hash, is_banned, deleted_at FROM users WHERE username = ?");
+    $stmt->execute([$username]);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if ($user && password_verify($password, $user['password_hash'])) {
+        if ($user['is_banned'] || $user['deleted_at'] !== null) {
+            response(["error" => "Аккаунт заблокирован или удален"], 403);
+        }
         $token = bin2hex(random_bytes(32));
         $pdo->prepare("UPDATE users SET api_token = ?, last_login_at = CURRENT_TIMESTAMP WHERE id = ?")->execute([$token, $user['id']]);
         response(["token" => $token]);
@@ -92,27 +106,30 @@ if ($method === 'POST' && $uri === '/login') {
     response(["error" => "Неверный логин или пароль"], 401);
 }
 
-// Получить профиль текущего юзера (getUser)
+// Получить профиль текущего юзера
 if ($method === 'GET' && $uri === '/user') {
     $user = requireAuth($pdo);
     response([
         "id" => (int)$user['id'],
         "username" => $user['username'],
         "display_name" => $user['display_name'],
-        "avatar_url" => $user['avatar_url']
+        "avatar_url" => $user['avatar_url'],
+        "role_id" => (int)$user['role_id']
     ]);
 }
 
-// Редактировать профиль текущего юзера (editUser)
+// Редактировать профиль текущего юзера
 if ($method === 'POST' && $uri === '/user/edit') {
     $user = requireAuth($pdo);
     
-    // Данные могут прийти как через FormData (multipart/form-data), так и через обычный JSON
-    $username = $_POST['username'] ?? $input['username'] ?? $user['username'];
-    $displayName = $_POST['display_name'] ?? $input['display_name'] ?? $user['display_name'];
+    $username = trim($_POST['username'] ?? $input['username'] ?? '');
+    $displayName = trim($_POST['display_name'] ?? $input['display_name'] ?? '');
+    
+    if ($username === '') $username = $user['username'];
+    if ($displayName === '') $displayName = $user['display_name'];
+    
     $avatarUrl = $user['avatar_url'];
     
-    // Обработка загрузки аватарки
     if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = __DIR__ . '/view/';
         if (!is_dir($uploadDir)) {
@@ -158,10 +175,10 @@ if ($method === 'POST' && $uri === '/user/edit') {
 
 // === POSTS ENDPOINTS ===
 
-// Получить посты (Фильтры по жанру, по автору, пагинация и флаг is_liked)
+// Получить посты
 if ($method === 'GET' && $uri === '/posts') {
     $genre = $_GET['genre'] ?? null;
-    $authorId = $_GET['author_id'] ?? null; // Фильтр по ID юзера
+    $authorId = $_GET['author_id'] ?? null;
     
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 10;
@@ -175,7 +192,7 @@ if ($method === 'GET' && $uri === '/posts') {
                CASE WHEN ? > 0 AND EXISTS(SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) THEN 1 ELSE 0 END as is_liked
         FROM posts p 
         JOIN users u ON p.author_id = u.id 
-        WHERE p.status_id = 2 
+        WHERE p.status_id = 2 AND p.deleted_at IS NULL AND u.deleted_at IS NULL AND u.is_banned = 0
     ";
     
     $params = [$userId, $userId];
@@ -196,7 +213,6 @@ if ($method === 'GET' && $uri === '/posts') {
     $stmt->execute($params);
     
     $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    
     foreach ($posts as &$post) {
         $post['is_liked'] = (bool)$post['is_liked'];
     }
@@ -208,9 +224,9 @@ if ($method === 'GET' && $uri === '/posts') {
 if ($method === 'POST' && $uri === '/posts') {
     $user = requireAuth($pdo);
     
-    $title = $_POST['title'] ?? $input['title'] ?? null;
-    $content = $_POST['content'] ?? $input['content'] ?? null;
-    $genre = $_POST['genre'] ?? $input['genre'] ?? null;
+    $title = trim($_POST['title'] ?? $input['title'] ?? '');
+    $content = trim($_POST['content'] ?? $input['content'] ?? '');
+    $genre = trim($_POST['genre'] ?? $input['genre'] ?? 'General');
     
     if (empty($title) || empty($content)) {
         response(["error" => "Заполните заголовок и контент"], 400);
@@ -264,7 +280,7 @@ if ($method === 'GET' && preg_match('#^/posts/(\d+)$#', $uri, $matches)) {
                CASE WHEN ? > 0 AND EXISTS(SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) THEN 1 ELSE 0 END as is_liked
         FROM posts p 
         JOIN users u ON p.author_id = u.id 
-        WHERE p.id = ? AND p.status_id = 2
+        WHERE p.id = ? AND p.status_id = 2 AND p.deleted_at IS NULL AND u.deleted_at IS NULL AND u.is_banned = 0
     ");
     $stmt->execute([$userId, $userId, $postId]);
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -275,15 +291,35 @@ if ($method === 'GET' && preg_match('#^/posts/(\d+)$#', $uri, $matches)) {
     response($post);
 }
 
+// Удалить пост (Мягкое удаление)
+if ($method === 'DELETE' && preg_match('#^/posts/(\d+)$#', $uri, $matches)) {
+    $user = requireAuth($pdo);
+    $postId = $matches[1];
+    
+    $stmt = $pdo->prepare("SELECT author_id FROM posts WHERE id = ? AND deleted_at IS NULL");
+    $stmt->execute([$postId]);
+    $post = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$post) response(["error" => "Пост не найден"], 404);
+    
+    // Удалить может только автор или модератор/админ (role_id > 1)
+    if ($post['author_id'] != $user['id'] && (int)$user['role_id'] === 1) {
+        response(["error" => "Недостаточно прав для удаления этого поста"], 403);
+    }
+    
+    $pdo->prepare("UPDATE posts SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")->execute([$postId]);
+    response(["message" => "Пост успешно удален"]);
+}
+
 // === COMMENTS ENDPOINTS ===
 
 // Получить комментарии поста
 if ($method === 'GET' && preg_match('#^/posts/(\d+)/comments$#', $uri, $matches)) {
     $stmt = $pdo->prepare("
-        SELECT c.id, c.content, c.created_at, u.username as author 
+        SELECT c.id, c.content, c.created_at, u.username as author, u.avatar_url as author_avatar
         FROM comments c 
         JOIN users u ON c.author_id = u.id 
-        WHERE c.post_id = ? 
+        WHERE c.post_id = ? AND c.deleted_at IS NULL AND u.deleted_at IS NULL AND u.is_banned = 0
         ORDER BY c.created_at ASC
     ");
     $stmt->execute([$matches[1]]);
@@ -294,18 +330,55 @@ if ($method === 'GET' && preg_match('#^/posts/(\d+)/comments$#', $uri, $matches)
 if ($method === 'POST' && preg_match('#^/posts/(\d+)/comments$#', $uri, $matches)) {
     $user = requireAuth($pdo);
     $postId = $matches[1];
+    $content = trim($_POST['content'] ?? $input['content'] ?? '');
+    
+    if (empty($content)) {
+        response(["error" => "Комментарий не может быть пустым"], 400);
+    }
+    
+    // Проверим, существует ли активный пост
+    $checkPost = $pdo->prepare("SELECT 1 FROM posts WHERE id = ? AND deleted_at IS NULL");
+    $checkPost->execute([$postId]);
+    if (!$checkPost->fetch()) response(["error" => "Пост не найден"], 404);
     
     $pdo->beginTransaction();
     try {
         $stmt = $pdo->prepare("INSERT INTO comments (post_id, author_id, content) VALUES (?, ?, ?)");
-        $stmt->execute([$postId, $user['id'], $input['content']]);
+        $stmt->execute([$postId, $user['id'], $content]);
         
         $pdo->prepare("UPDATE posts SET comments_count = comments_count + 1 WHERE id = ?")->execute([$postId]);
         $pdo->commit();
         response(["message" => "Комментарий добавлен"], 201);
     } catch (Exception $e) {
         $pdo->rollBack();
-        response(["error" => "Ошибка добавления"], 500);
+        response(["error" => "Ошибка добавления комментария"], 500);
+    }
+}
+
+// Удалить комментарий
+if ($method === 'DELETE' && preg_match('#^/comments/(\d+)$#', $uri, $matches)) {
+    $user = requireAuth($pdo);
+    $commentId = $matches[1];
+    
+    $stmt = $pdo->prepare("SELECT author_id, post_id FROM comments WHERE id = ? AND deleted_at IS NULL");
+    $stmt->execute([$commentId]);
+    $comment = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$comment) response(["error" => "Комментарий не найден"], 404);
+    
+    if ($comment['author_id'] != $user['id'] && (int)$user['role_id'] === 1) {
+        response(["error" => "Недостаточно прав"], 403);
+    }
+    
+    $pdo->beginTransaction();
+    try {
+        $pdo->prepare("UPDATE comments SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?")->execute([$commentId]);
+        $pdo->prepare("UPDATE posts SET comments_count = MAX(0, comments_count - 1) WHERE id = ?")->execute([$comment['post_id']]);
+        $pdo->commit();
+        response(["message" => "Комментарий удален"]);
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        response(["error" => "Ошибка при удалении"], 500);
     }
 }
 
@@ -316,15 +389,20 @@ if ($method === 'POST' && preg_match('#^/posts/(\d+)/like$#', $uri, $matches)) {
     $user = requireAuth($pdo);
     $postId = $matches[1];
 
-    $checkStmt = $pdo->prepare("SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?");
-    $checkStmt->execute([$user['id'], $postId]);
-    $hasLiked = $checkStmt->fetch();
+    // Проверим существование поста перед лайком
+    $checkPost = $pdo->prepare("SELECT 1 FROM posts WHERE id = ? AND deleted_at IS NULL");
+    $checkPost->execute([$postId]);
+    if (!$checkPost->fetch()) response(["error" => "Пост не найден"], 404);
+
+    $checkLike = $pdo->prepare("SELECT 1 FROM likes WHERE user_id = ? AND post_id = ?");
+    $checkLike->execute([$user['id'], $postId]);
+    $hasLiked = $checkLike->fetch();
 
     $pdo->beginTransaction();
     try {
         if ($hasLiked) {
             $pdo->prepare("DELETE FROM likes WHERE user_id = ? AND post_id = ?")->execute([$user['id'], $postId]);
-            $pdo->prepare("UPDATE posts SET likes_count = likes_count - 1 WHERE id = ?")->execute([$postId]);
+            $pdo->prepare("UPDATE posts SET likes_count = MAX(0, likes_count - 1) WHERE id = ?")->execute([$postId]);
             $action = "Лайк убран";
             $isLiked = false;
         } else {
@@ -355,17 +433,17 @@ if ($method === 'GET' && preg_match('#^/user/(\d+)$#', $uri, $matches)) {
     $stmt = $pdo->prepare("
         SELECT id, username, display_name, avatar_url 
         FROM users 
-        WHERE id = ? AND deleted_at IS NULL
+        WHERE id = ? AND deleted_at IS NULL AND is_banned = 0
         LIMIT 1
     ");
     $stmt->execute([$matches[1]]);
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$profile) response(["error" => "Пользователь не найден"], 404);
+    if (!$profile) response(["error" => "Пользователь не найден или заблокирован"], 404);
 
     $profile['id'] = (int)$profile['id'];
     response($profile);
 }
 
-// 404
+// 404 Fallback
 response(["error" => "Эндпоинт не найден"], 404);
