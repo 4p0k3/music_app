@@ -1,228 +1,327 @@
 # Music Forum REST API
 
-## 🚀 Как запустить
-- **Встроенный PHP сервер:** Открой терминал в папке проекта и введи:
-  `php -S localhost:8000`
-  API будет доступно по адресу `http://localhost:8000/api/...`
+REST API музыкального форума на PHP + SQLite.
+
+## Возможности
+
+- Регистрация и авторизация
+- Bearer Token authentication
+- Публикация постов
+- Комментарии
+- Лайки
+- Загрузка изображений
+- Pagination
+- Soft delete
+- Редактирование профиля
+- SQLite database
+- JSON REST API
 
 ---
 
-## Endpoints и Примеры
+# Стек
 
-### AUTH
+- PHP 8+
+- SQLite
+- PDO
+- JSON API
 
-#### 1. Регистрация
-**POST** `/api/register`
-*Входные данные (JSON):*
-```json
-{
-  "username": "new_user",
-  "password": "my_password",
-  "display_name": "New User"
-}
-```
-*Выходные данные (201):*
-```json
-{"message": "Пользователь зарегистрирован"}
+---
+
+# Запуск
+
+```bash
+php -S localhost:8000
 ```
 
-#### 2. Логин
-**POST** `/api/login`
-*Входные данные (JSON):*
-```json
-{
-  "username": "audiophile99",
-  "password": "password"
-}
-```
-*Выходные данные (200):* Токен нужно передавать в заголовке `Authorization: Bearer <token>` для закрытых методов.
-```json
-{"token": "f2a3...длинный_токен...8b9"}
+API:
+
+```text
+http://localhost:8000/api/
 ```
 
 ---
 
-### USERS
+# Структура проекта
 
-#### 3. Получить профиль текущего пользователя
-**GET** `/api/user`
-Headers: `Authorization: Bearer <токен>`
+```text
+project/
+│
+├── index.php
+├── schema.sql
+├── database.sqlite
+├── README.md
+│
+└── view/
+    ├── upload_xxx.png
+    └── upload_xxx.jpg
+```
 
-*Выходные данные (200):*
+---
+
+# Авторизация
+
+После логина сервер возвращает токен:
+
+```json
+{
+  "token": "your_token"
+}
+```
+
+Передавать его нужно так:
+
+```http
+Authorization: Bearer your_token
+```
+
+---
+
+# API Endpoints
+
+# AUTH
+
+## POST `/api/register`
+
+Регистрация пользователя.
+
+### JSON
+
+```json
+{
+  "username": "fox",
+  "password": "123456",
+  "display_name": "Fox"
+}
+```
+
+### Ответ
+
+```json
+{
+  "message": "Пользователь зарегистрирован"
+}
+```
+
+---
+
+## POST `/api/login`
+
+Авторизация.
+
+### JSON
+
+```json
+{
+  "username": "fox",
+  "password": "123456"
+}
+```
+
+### Ответ
+
+```json
+{
+  "token": "very_long_token"
+}
+```
+
+---
+
+# USERS
+
+## GET `/api/user`
+
+Текущий пользователь.
+
+### Headers
+
+```http
+Authorization: Bearer token
+```
+
+### Ответ
+
 ```json
 {
   "id": 1,
-  "username": "audiophile99",
-  "display_name": "Alex",
-  "avatar_url": "/view/avatar_653b4c1a.png"
-}
-```
-
-#### 4. Получить публичный профиль пользователя по ID
-**GET** `/api/user/{id}`
-
-*Выходные данные (200):*
-```json
-{
-  "id": 1,
-  "username": "audiophile99",
-  "display_name": "Alex",
-  "avatar_url": "/view/avatar_653b4c1a.png"
-}
-```
-
-#### 5. Редактировать профиль текущего пользователя
-**POST** `/api/user/edit`
-Headers: `Authorization: Bearer <токен>`
-
-Принимает `multipart/form-data` (для загрузки аватарки) или `application/json`.
-
-*Входные данные:*
-```
-display_name  (string, опционально)
-username      (string, опционально)
-avatar        (file: jpg/jpeg/png/gif/webp, опционально)
-```
-
-*Выходные данные (200):*
-```json
-{
-  "message": "Профиль успешно обновлен",
-  "user": {
-    "id": 1,
-    "username": "audiophile99",
-    "display_name": "Alex",
-    "avatar_url": "/view/avatar_6abc123.png"
-  }
+  "username": "fox",
+  "display_name": "Fox",
+  "avatar_url": "/view/upload_xxx.png",
+  "role_id": 1
 }
 ```
 
 ---
 
-### POSTS
+## GET `/api/user/{id}`
 
-#### 6. Получить все посты
-**GET** `/api/posts`
+Публичный профиль пользователя.
 
-Поддерживает query-параметры:
-| Параметр    | Тип    | Описание                             |
-|-------------|--------|--------------------------------------|
-| `genre`     | string | Фильтр по жанру                      |
-| `author_id` | int    | Фильтр по ID автора                  |
-| `page`      | int    | Номер страницы (по умолчанию: 1)     |
-| `limit`     | int    | Постов на страницу (по умолчанию: 10, макс: 100) |
+---
 
-Headers (опционально): `Authorization: Bearer <токен>` — включает поле `is_liked`
+## POST `/api/user/edit`
 
-*Выходные данные (200):*
-```json
-[
-  {
-    "id": 1,
-    "title": "Настройка ViPER4Android",
-    "content": "Ребят, кто как настраивает ViPER4Android для наушников KZ?",
-    "genre": "Audio",
-    "image_path": null,
-    "likes_count": 1,
-    "comments_count": 1,
-    "created_at": "2023-10-25 10:00:00",
-    "author": "audiophile99",
-    "is_liked": false
-  }
-]
-```
+Редактирование профиля.
 
-#### 7. Получить один пост
-**GET** `/api/posts/{id}`
+Поддерживает:
+- multipart/form-data
+- application/json
 
-Headers (опционально): `Authorization: Bearer <токен>` — включает поле `is_liked`
+### Поля
 
-*Выходные данные (200):* Структура аналогична одному объекту из п. 6.
+| Поле | Тип |
+|---|---|
+| username | string |
+| display_name | string |
+| avatar | image |
 
-#### 8. Создать пост
-**POST** `/api/posts`
-Headers: `Authorization: Bearer <токен>`
+---
 
-Принимает `multipart/form-data` (для загрузки изображения) или `application/json`.
+# POSTS
 
-*Входные данные:*
-```
-title    (string, обязательно)
-content  (string, обязательно)
-genre    (string, опционально)
-image    (file: jpg/jpeg/png/gif/webp, опционально)
-```
+## GET `/api/posts`
 
-*Выходные данные (201):*
+Получить список постов.
+
+### Query params
+
+| Параметр | Описание |
+|---|---|
+| genre | Фильтр по жанру |
+| author_id | ID автора |
+| page | Номер страницы |
+| limit | Лимит |
+
+### Ответ
+
 ```json
 {
-  "message": "Пост создан",
-  "id": 2,
-  "genre": "Rock",
-  "image_path": "/view/post_654b2c1d.jpg"
+  "page": 1,
+  "limit": 10,
+  "total": 52,
+  "pages": 6,
+  "data": []
 }
 ```
 
 ---
 
-### LIKES
+## GET `/api/posts/{id}`
 
-#### 9. Поставить / убрать лайк
-**POST** `/api/posts/{id}/like`
-Headers: `Authorization: Bearer <токен>`
+Получить один пост.
 
-Тоггл: ставит лайк, если его нет, и убирает, если есть.
+---
 
-*Выходные данные (200):*
+## POST `/api/posts`
+
+Создать пост.
+
+### Поля
+
+| Поле | Тип |
+|---|---|
+| title | string |
+| content | string |
+| genre | string |
+| image | image |
+
+---
+
+## DELETE `/api/posts/{id}`
+
+Удаление поста.
+
+Доступ:
+- автор
+- администратор
+
+---
+
+# COMMENTS
+
+## GET `/api/posts/{id}/comments`
+
+Получить комментарии.
+
+---
+
+## POST `/api/posts/{id}/comments`
+
+Создать комментарий.
+
+### JSON
+
 ```json
 {
-  "message": "Лайк поставлен",
-  "is_liked": true,
-  "likes_count": 2
+  "content": "Крутой пост"
 }
 ```
 
 ---
 
-### COMMENTS
+## DELETE `/api/comments/{id}`
 
-#### 10. Получить комментарии поста
-**GET** `/api/posts/{id}/comments`
-
-*Выходные данные (200):*
-```json
-[
-  {
-    "id": 1,
-    "content": "Попробуй пресеты для Poweramp, звучит намного чище.",
-    "created_at": "2023-10-25 10:05:00",
-    "author": "basshead"
-  }
-]
-```
-
-#### 11. Оставить комментарий
-**POST** `/api/posts/{id}/comments`
-Headers: `Authorization: Bearer <токен>`
-
-*Входные данные (JSON):*
-```json
-{"content": "Крутой пост, спасибо!"}
-```
-
-*Выходные данные (201):*
-```json
-{"message": "Комментарий добавлен"}
-```
+Удалить комментарий.
 
 ---
 
-## Коды ошибок
+# LIKES
 
-| Код | Описание                                   |
-|-----|--------------------------------------------|
-| 400 | Неверные входные данные                    |
-| 401 | Требуется авторизация / неверный токен     |
-| 404 | Ресурс не найден                           |
-| 409 | Конфликт (например, никнейм уже занят)     |
-| 500 | Внутренняя ошибка сервера                  |
+## POST `/api/posts/{id}/like`
+
+Поставить/убрать лайк.
+
+---
+
+# Поддерживаемые изображения
+
+- JPG
+- JPEG
+- PNG
+- GIF
+- WEBP
+
+---
+
+# Валидация
+
+## Username
+- минимум: 3
+- максимум: 32
+
+## Password
+- минимум: 6
+- максимум: 128
+
+## Post content
+- максимум: 10000
+
+## Comment content
+- максимум: 3000
+
+---
+
+# Особенности
+
+- soft delete вместо полного удаления
+- banned users не могут логиниться
+- MIME type validation
+- защита от SQL injection
+- pagination metadata
+- transactions для лайков и комментариев
+
+---
+
+# HTTP Codes
+
+| Код | Описание |
+|---|---|
+| 200 | Успешно |
+| 201 | Создано |
+| 400 | Неверные данные |
+| 401 | Не авторизован |
+| 403 | Доступ запрещён |
+| 404 | Не найдено |
+| 409 | Конфликт |
+| 500 | Ошибка сервера |
+
