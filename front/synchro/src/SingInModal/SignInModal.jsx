@@ -1,7 +1,7 @@
 import style from './SignInModal.module.css';
 import { useState } from 'react';
-import InputField from '../../InputField/InputField';
-import MainButton from '../../MainButton/MainButton';
+import InputField from '../InputField/InputField';
+import MainButton from '../MainButton/MainButton';
 function SignInModal({children, label = "label", onClose}){
     let modalLabel = label;
     return(

@@ -35,3 +35,28 @@ nav{
     align-items: center;
     border-radius: 0px 0px 16px 16px;
 }
+.genresDropdownContainer {
+  position: relative;     
+  display: flex;
+    
+}
+
+.genresDropdown {
+  position: absolute;     
+  top: 100%;              
+  left: 0;                
+  z-index: 100;           
+  
+  margin-top: 4px;        
+}
+.genresDropdownItem{
+    margin-top: 4px;
+    padding: 16px;
+    border-radius: 16px;
+    white-space: nowrap;
+    
+}
+.genresDropdownItem:hover{
+    background-color: #f5f5f5;
+    cursor: pointer;
+}

@@ -5,7 +5,7 @@ import Main from '../Main/Main'
 import InfoArea from '../InfoArea/InfoArea'
 import PostsItem from '../PostsItem/PostsItem'
 import ReleasesItem from '../ReleasesItem/ReleasesItem'
-import Footer from '../assets/Footer/Footer'
+import Footer from '../Footer/Footer'
 function Home() {
   const lorem = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam aliquid odio ab, officiis adipisci accusamus ipsam itaque voluptatum quae odit commodi similique repellendus eos saepe! Nobis assumenda quisquam mollitia ipsa!";
   return (

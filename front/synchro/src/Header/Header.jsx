@@ -5,8 +5,9 @@ import MainButton from '../MainButton/MainButton';
 import SearchBar from '../SearchBar/SearchBar';
 import InputField from '../InputField/InputField';
 import inputFieldStyle from '../InputField/InputField.module.css'
-import SignInModal from '../assets/SingInModal/SignInModal';
-import signInModalStyle from '../assets/SingInModal/SignInModal.module.css';
+import SignInModal from '../SingInModal/SignInModal';
+import signInModalStyle from '../SingInModal/SignInModal.module.css';
+import InfoArea from '../InfoArea/InfoArea';
 function Header(){
     const [modalLoginOpen, setModalLoginOpen] = useState(false);
     const modalLoginPopupOpen = () =>{
@@ -21,6 +22,10 @@ function Header(){
     }
     const modalRegistrationPopupClose = () =>{
         setModalRegistrationOpen(false);
+    }
+    const [isGenresDropdownOpen, setGenresDropdown] = useState(false);
+    const genresDropdownToggle = () =>{
+        setGenresDropdown(prev => !prev);
     }
     const navigate = useNavigate();
 
@@ -37,10 +42,39 @@ function Header(){
             <div className={style.HeaderContent}>
                 <img src="src\SynchroLogo\synchro_black.svg" alt="SYNCHRO" onClick={NavigateHome} className={style.headerLogo}/>
                 <SearchBar/>
-                <MainButton callback={modalLoginPopupOpen} text="Вход" type="main"/>
+                <MainButton  callback={modalLoginPopupOpen} text="Вход" type="main"/>
             </div>
             <nav>
-                <MainButton text="Жанры" type="nav"/>
+                <div className={style.genresDropdownContainer}>
+                 
+                    <MainButton text="Жанры" type="nav" callback={genresDropdownToggle}/>
+
+                    {(isGenresDropdownOpen &&
+                        <div className={style.genresDropdown}>
+                            <InfoArea label = "Жанры">
+                                <div className={style.genresDropdownItem}>
+                                    <h2>Поп</h2>
+                                </div>
+                                <div className={style.genresDropdownItem}>
+                                    <h2>Хип-Хоп</h2>
+                                </div>
+                                <div className={style.genresDropdownItem}>
+                                    <h2>Рок</h2>
+                                </div>
+                                <div className={style.genresDropdownItem}>
+                                    <h2>EDM</h2>
+                                </div>
+                                <div className={style.genresDropdownItem}>
+                                    <h2>R&B</h2>
+                                </div>
+                                <div className={style.genresDropdownItem}>
+                                    <h2>Hyperpop</h2>
+                                </div>
+                            </InfoArea>
+                        </div>
+                    )}
+                </div>
+                
                 <MainButton text="Все посты" type="nav" callback={NavigateAllPosts}/>
             </nav>
         </header>
@@ -55,7 +89,6 @@ function Header(){
         <MainButton callback={modalLoginPopupClose} text="Вход" type="main"/>
         <div className={signInModalStyle.modalBottomOptions}>
             <a><p onClick={() => {modalRegistrationPopupOpen(); modalLoginPopupClose();}}>Регистрация</p></a>
-            <a><p>Забыли пароль?</p></a>
         </div>
         </SignInModal>
         )}
@@ -70,7 +103,6 @@ function Header(){
         <MainButton callback={modalRegistrationPopupClose} text="Регистраиця" type="main"/>
         <div className={signInModalStyle.modalBottomOptions}>
             <a onClick={() => {modalRegistrationPopupClose(); modalLoginPopupOpen();}}><p>Логин</p></a>
-            <a href=""><p>Забыли пароль?</p></a>
         </div>
         </SignInModal>
         )}

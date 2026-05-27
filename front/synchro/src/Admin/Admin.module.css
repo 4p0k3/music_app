@@ -1,0 +1,23 @@
+.ChooseUserItem{
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    padding: 12px 20px;
+}
+.ChooseUserItem:hover{
+    cursor: pointer;
+}
+.userPfp{
+    height: 52px;
+    width: 52px;
+    border-radius: 10000px;
+    margin-right: 10px;
+}
+.postWithButtons{
+    gap: 20px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: start;
+}

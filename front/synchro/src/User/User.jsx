@@ -1,37 +1,69 @@
+import { useState } from 'react';
 import style from './User.module.css';
 import InfoArea from '../InfoArea/InfoArea';
-import TextArea from '../assets/TextArea/TextArea';
+import TextArea from '../TextArea/TextArea';
 import Header from '../Header/Header';
 import Main from '../Main/Main';
-import Footer from '../assets/Footer/Footer';
+import Footer from '../Footer/Footer';
 import PostsItem from '../PostsItem/PostsItem';
 import MainButton from '../MainButton/MainButton';
+import SignInModal from '../SingInModal/SignInModal';
+import InputField from '../InputField/InputField';
+import userData from '../data/users.json';
+
+
+
+
 function User(){
+    const [user,setUser] = useState(userData);
+    const lorem = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam aliquid odio ab, officiis adipisci accusamus ipsam itaque voluptatum quae odit commodi similique repellendus eos saepe! Nobis assumenda quisquam mollitia ipsa!";
+    const [modalLoginOpen, setModalLoginOpen] = useState(false);
+        const modalLoginPopupOpen = () =>{
+            setModalLoginOpen(true);
+        }
+        const modalLoginPopupClose = () =>{
+            setModalLoginOpen(false);
+        }
+
     return(
         <>
+
             <Header/>
             <Main>
+                {/* CREATE POST */}
+                {(modalLoginOpen && 
+                <SignInModal label="Создать пост" onClose={modalLoginPopupClose}>
+                    <div className={style.CreatePostContent}>
+                        <InputField placeholder="Заголовок поста"></InputField>
+                        <InputField placeholder="Текст поста"></InputField>
+                        <input type="file" id="myFile" name="filename"></input>
+                        <MainButton text="Создать" type="main" callback={modalLoginPopupClose}></MainButton>
+                    </div>
+                </SignInModal>
+                )}
+
                 <div className={style.UserContainer}>
                     <TextArea className={style.UserInfo}>
-                        <img src="https://placehold.co/400x400" alt="Аватар Пользователя" className={style.UserProfilePfp}/>
+                        <img src={user.pfpUrl} alt="Аватар Пользователя" className={style.UserProfilePfp}/>
                         <div className={style.UserTextWrapper}>
-                            <p className={style.UserNickname}>Nickname</p>
+                            <p className={style.UserNickname}>{user.nickname}</p>
                             <p className={style.UsernameAndDate}>
-                            @username
-                            13.06.2008
+                            @{user.username} <br />
+                            {user.creationDate}
                             </p>
                         </div>
                         <div className={style.UserButtonsWrapper}>
-                            
+                            <button className={style.UserSettingsButton}>
+                                <img src="src\assets\settings.svg" alt="" className={style.UserSettingsIcon}/>
+                            </button>  
+                             
                         </div>
 
                     </TextArea>
-
-                    <MainButton text="Создать посты" type="nav"/>
-
+                        <MainButton text="Создать пост" type="main" className={style.CreatePostButton} callback={modalLoginPopupOpen}/>
                     <InfoArea label="Посты пользователя">
-                        <PostsItem/> 
-                        <PostsItem/>  
+                        <PostsItem type="main" content={lorem}/> 
+                        <PostsItem type="main" content={lorem}/>  
                     </InfoArea>     
                 </div>   
             </Main>
