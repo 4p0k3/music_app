@@ -66,3 +66,51 @@ main{
     line-height: 28px;
 
 }
+.likeButton{
+    width: 100%;
+    display: flex;
+    gap: 10px;
+}
+.commentPfp{
+    height: 64px;
+    border-radius: 10000px;
+}
+.commentContainer{
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    justify-content: start;
+    gap: 10px;
+}
+.commentWrapper{
+    
+    min-width: 376px;
+    margin: 8px 0px 8px 0px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    padding: 8px;
+    border-radius: 16px;
+    h3{
+        font-size: 18px;
+        color: #696969;
+        font-weight: normal;
+    }
+}
+.commentWrapper:hover{
+    background-color: #f5f5f5;
+    transition: 0.1s;
+    cursor: pointer;
+}    
+
+.postComment{
+    display: flex;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    margin-top: 10px;
+    gap:10px;
+}

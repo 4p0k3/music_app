@@ -30,7 +30,7 @@ function PostsItem({cover="https://placehold.co/150x200", header="header", nickn
                 </div>
                 <span className={style.PostsItemInfo}>
                     <h2 className={style.PostsItemHeader}>{PostsItemHeader}</h2>
-                    <h3>@{PostsItemNickname} | {PostsItemDate}</h3>
+                    <h3>@{PostsItemNickname} | {PostsItemDate} | Лайки: 67 | Жанр: Hyperpop</h3>
                     <p className={style.PostsItemContent}>{PostsItemContent}</p>
                     
                     

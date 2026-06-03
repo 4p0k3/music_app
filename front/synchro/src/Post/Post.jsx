@@ -1,11 +1,15 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Header from '../Header/Header'
 import Main from '../Main/Main'
 import InfoArea from '../InfoArea/InfoArea'
 import TextArea from '../TextArea/TextArea'
 import style from './Post.module.css'
 import Footer from '../Footer/Footer'
-import { useNavigate } from 'react-router-dom'
+import MainButton from '../MainButton/MainButton'
+import PostsItem from '../PostsItem/PostsItem'
+import InputField from '../InputField/InputField'
+
 
 function Post({}) {
   
@@ -35,7 +39,8 @@ function Post({}) {
             <TextArea className={style.PostHeader}>
               {PostHeader}
             </TextArea>
-            <p className={style.PostDateAndUser}>{PostDate}</p>
+            <p className={style.PostDateAndUser}>{PostDate} | Жанр: Hyperpop</p>
+            
 
             <TextArea onClick={NavigateUser} className={style.PostUser}>
             <img src={UserPfpUrl} alt="Изображение профиля" className={style.PostUserPfp}/>
@@ -55,7 +60,28 @@ function Post({}) {
            {PostContent}
           </TextArea>
       </div>
-      
+      <div className={style.likeButton}>
+        <MainButton text="🖤" type="main"/>
+        <TextArea> <h2>Лайки: 6767</h2></TextArea>
+      </div>
+      <InfoArea label='Комментарии: 67'>
+        <div className={style.postComment}>
+          <InputField placeholder="Комментарий"/>
+          <MainButton text="Отправить" type="main"/>
+        </div>
+        <div className={style.commentWrapper} onClick={NavigateUser}>
+          <div className={style.commentContainer}>
+            <img src="http://localhost:8000/view/avatar_6a16bf5b54ef0.png" alt="" className={style.commentPfp} />
+            <div className={style.commentText}>
+              <h2>aksdasdkjaskld</h2>
+              <h3>@nickname</h3>
+              <h3>01.01.2000</h3>
+              <p>{lorem}</p>
+            </div>
+          </div>
+        </div>
+        
+      </InfoArea>
     </Main>
     <Footer/>
     </>

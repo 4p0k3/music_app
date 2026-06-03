@@ -17,7 +17,7 @@ function App() {
           <Route path="/" element={<Home/>}/>
           <Route path="/AllPosts" element={<AllPosts/>}/>
           <Route path="/Post" element={<Post postImage="https://placehold.co/500x500" userPfp="src\ReleasesCovers\charlixcx_brat.png" nickname="nickname" username="username" header="header" content="nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger nigger " date="13.06.2008"/>}/>
-          <Route path="/User"element={<User/>}/>
+          <Route path="/User/:id"element={<User />}/>
           <Route path="/Admin"element={<Admin/>}/>
         </Routes>
       </BrowserRouter>

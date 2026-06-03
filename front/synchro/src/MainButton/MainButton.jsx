@@ -2,19 +2,19 @@ import style from './MainButton.module.css'
 import { useState } from 'react';
 
 
-function MainButton({text,type, callback, className}){
-let buttonText = text;
-let buttonType = type;
+function MainButton({text,type="button", buttonType,callback, className}){
 
-if (buttonType == "main"){
+
+
+if (type == "main"){
 
     return(
-        <button  onClick = {callback} className={style.MainButton}><b>{buttonText}</b></button>
+        <button  type = {buttonType} onClick = {callback} className={style.MainButton}><b>{text}</b></button>
     );
 }
-else if (buttonType == "nav"){
+else if (type == "nav"){
     return(
-        <button onClick = {callback} className={style.NavButton}><b>{buttonText}</b></button>
+        <button type = {buttonType} onClick = {callback} className={style.NavButton}><b>{text}</b></button>
     );
 }
 

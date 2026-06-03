@@ -1,3 +1,4 @@
+import { register } from "../api";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import style from './Header.module.css';
@@ -8,7 +9,10 @@ import inputFieldStyle from '../InputField/InputField.module.css'
 import SignInModal from '../SingInModal/SignInModal';
 import signInModalStyle from '../SingInModal/SignInModal.module.css';
 import InfoArea from '../InfoArea/InfoArea';
+import logo from "../assets/SynchroLogo/synchro_black.svg"
+
 function Header(){
+    //MODAL OPEN/CLOSE
     const [modalLoginOpen, setModalLoginOpen] = useState(false);
     const modalLoginPopupOpen = () =>{
         setModalLoginOpen(true);
@@ -23,6 +27,34 @@ function Header(){
     const modalRegistrationPopupClose = () =>{
         setModalRegistrationOpen(false);
     }
+
+    // REGISTRATION
+    const [username, setUsername] = useState("");
+    const [displayName, setDisplayName] = useState("");
+    const [password, setPassword] = useState("");
+    
+    //HANDLE REGISTER
+    async function handleRegister() {
+        console.log("username:", username);
+        console.log("displayName:", displayName);
+        console.log("password:", password);
+
+        try {
+            const result = await register(
+                username,
+                displayName,
+                password
+            );
+
+            console.log(result.message);
+            modalRegistrationPopupClose();
+
+        } catch (error) {
+            console.log(error.message);
+        }
+    }
+    
+
     const [isGenresDropdownOpen, setGenresDropdown] = useState(false);
     const genresDropdownToggle = () =>{
         setGenresDropdown(prev => !prev);
@@ -40,7 +72,7 @@ function Header(){
         <>
         <header>
             <div className={style.HeaderContent}>
-                <img src="src\SynchroLogo\synchro_black.svg" alt="SYNCHRO" onClick={NavigateHome} className={style.headerLogo}/>
+                <img src={logo} alt="SYNCHRO" onClick={NavigateHome} className={style.headerLogo}/>
                 <SearchBar/>
                 <MainButton  callback={modalLoginPopupOpen} text="Вход" type="main"/>
             </div>
@@ -84,7 +116,7 @@ function Header(){
         <SignInModal label="Вход" onClose={modalLoginPopupClose}>
         <div className={signInModalStyle.inputContainer}>
             <InputField placeholder="Логин"/>
-            <InputField placeholder="Пароль"/>
+            <InputField placeholder="Пароль" type="password"/>
         </div>
         <MainButton callback={modalLoginPopupClose} text="Вход" type="main"/>
         <div className={signInModalStyle.modalBottomOptions}>
@@ -95,12 +127,15 @@ function Header(){
         {/* REGISTRATION MODAL */}
         {(modalRegistrationOpen && 
         <SignInModal label="Регистрация" onClose={modalRegistrationPopupClose}>
-        <div className={signInModalStyle.inputContainer}>
-            <InputField placeholder="Логин"/>
-            <InputField placeholder="Отображаемое имя"/>
-            <InputField placeholder="Пароль"/>
-        </div>
-        <MainButton callback={modalRegistrationPopupClose} text="Регистраиця" type="main"/>
+        {/* <div className={signInModalStyle.inputContainer}> */}
+            <form action={handleRegister} className={signInModalStyle.inputContainer}>
+            <InputField placeholder="Логин" value={username} onChange={(e) => setUsername(e.target.value)}/>
+            <InputField placeholder="Отображаемое имя" value={username} onChange={(e) => setDisplayName(e.target.value)}/>
+            <InputField placeholder="Пароль" value={username} onChange={(e) => setPassword(e.target.value)} type="password"/>
+           
+        {/* </div> */}
+            <MainButton text="Регистраиця" type="main" buttonType="submit"/>
+        </form> 
         <div className={signInModalStyle.modalBottomOptions}>
             <a onClick={() => {modalRegistrationPopupClose(); modalLoginPopupOpen();}}><p>Логин</p></a>
         </div>
