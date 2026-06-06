@@ -1,3 +1,12 @@
+import {
+    getPostById,
+    toggleLike,
+    getComments,
+    createComment,
+    deleteComment
+} from "../api";
+import { useEffect } from "react";
+import { useParams } from 'react-router-dom'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Header from '../Header/Header'
@@ -9,26 +18,85 @@ import Footer from '../Footer/Footer'
 import MainButton from '../MainButton/MainButton'
 import PostsItem from '../PostsItem/PostsItem'
 import InputField from '../InputField/InputField'
+import default_avatar from "../assets/default_avatar.svg";
 
 
-function Post({}) {
-  
-  const navigate = useNavigate();
+function Post() {
+  //COMMENTS
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  async function handleComment() {
+    if (!commentText.trim()) return;
 
-    const NavigateUser = () =>{
-        navigate("/User")
+    try {
+        await createComment(post.id, commentText);
+
+        const commentsData = await getComments(post.id);
+
+        setComments(commentsData);
+        setCommentText("");
+    } catch (error) {
+        console.error(error);
     }
-  
-  const lorem = "Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quibusdam esse culpa eligendi alias! Eligendi sapiente placeat asperiores rerum distinctio voluptate excepturi odit maiores provident explicabo minima commodi quo, doloribus eos.";
-  
-  let PostImageUrl = "src/ReleasesCovers/charlixcx_brat.png";
-  let UserPfpUrl = "src/ReleasesCovers/charlixcx_brat.png";
-  let PostUserNickName = "okak";
-  let PostUsername = "pocoyo67";
-  let PostHeader = "Заголовок поста";
-  let PostContent = lorem;
-  let PostDate = "13.06.2008";
-  
+  }
+  const currentUser = JSON.parse(
+    localStorage.getItem("user") || "{}"
+  );
+  async function handleDeleteComment(commentId) {
+      try {
+          await deleteComment(commentId);
+
+          setComments((prev) =>
+              prev.filter((comment) => comment.id !== commentId)
+          );
+      } catch (error) {
+          console.error(error);
+      }
+  }
+  //LIKE
+  async function handleLike() {
+    try {
+        const result = await toggleLike(post.id);
+
+        setPost((prev) => ({
+            ...prev,
+            likes_count: result.likes_count,
+        }));
+    } catch (error) {
+        console.error(error);
+    }
+  }
+
+    const navigate = useNavigate();
+    const { id } = useParams();
+
+    const [post, setPost] = useState(null);
+
+    useEffect(() => {
+    async function loadPost() {
+        try {
+            const data = await getPostById(id);
+
+            console.log("POST:", data);
+
+            setPost(data);
+            const commentsData = await getComments(id);
+            setComments(commentsData);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    loadPost();
+}, [id]);
+
+    if (!post) {
+        return <div>Загрузка...</div>;
+    }
+
+    const NavigateUser = () => {
+        navigate(`/User/${post.author_id}`);
+    };
   
   return (
     <>
@@ -37,49 +105,91 @@ function Post({}) {
       <div className={style.HeaderContent}>
           <div className={style.HeaderInfo}>
             <TextArea className={style.PostHeader}>
-              {PostHeader}
+              {post.title}
             </TextArea>
-            <p className={style.PostDateAndUser}>{PostDate} | Жанр: Hyperpop</p>
+            <p className={style.PostDateAndUser}>{new Date(post.created_at).toLocaleDateString("ru-RU")} | Жанр: {post.genre}</p>
             
 
             <TextArea onClick={NavigateUser} className={style.PostUser}>
-            <img src={UserPfpUrl} alt="Изображение профиля" className={style.PostUserPfp}/>
+            <img src={post.avatar_url ? `http://localhost:8000${post.avatar_url}` : default_avatar } alt="" className={style.PostUserPfp}/>
               <div className={style.PostUserText}>
-                <p className={style.PostHeader}>{PostUserNickName}</p>
-                <p className={style.PostDateAndUser}>@{PostUsername}</p>
+                <p className={style.PostHeader}>
+                 {post.display_name}
+                </p>
+
+                <p className={style.PostDateAndUser}>
+                  @{post.username}
+                </p>
               </div>
             </TextArea>
           </div>
         
-        <img src={PostImageUrl} alt="Изображение профиля" className={style.PostImage}/>
+        <img
+    src={`http://localhost:8000${post.image_path}`} alt="" className={style.PostImage}/>
         
         
       </div>
       <div className={style.PostContent}>
           <TextArea className={style.PostText}>
-           {PostContent}
+           {post.content}
           </TextArea>
       </div>
       <div className={style.likeButton}>
-        <MainButton text="🖤" type="main"/>
-        <TextArea> <h2>Лайки: 6767</h2></TextArea>
+        <MainButton text="🖤" type="main" callback={handleLike}/>
+        <TextArea> <h2>{post.likes_count}</h2></TextArea>
       </div>
-      <InfoArea label='Комментарии: 67'>
+      <InfoArea label={`Комментарии: ${comments.length}`}>
         <div className={style.postComment}>
-          <InputField placeholder="Комментарий"/>
-          <MainButton text="Отправить" type="main"/>
+          <InputField
+              placeholder="Комментарий"
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+          />
+          <MainButton
+              text="Отправить"
+              type="main"
+              callback={handleComment}
+          />
         </div>
-        <div className={style.commentWrapper} onClick={NavigateUser}>
-          <div className={style.commentContainer}>
-            <img src="http://localhost:8000/view/avatar_6a16bf5b54ef0.png" alt="" className={style.commentPfp} />
-            <div className={style.commentText}>
-              <h2>aksdasdkjaskld</h2>
-              <h3>@nickname</h3>
-              <h3>01.01.2000</h3>
-              <p>{lorem}</p>
-            </div>
+        {comments.map((comment) => (
+          <div
+              key={comment.id}
+              className={style.commentWrapper}
+              onClick={() => navigate(`/User/${comment.author_id}`)}
+          >
+              <div className={style.commentContainer}>
+                  <img
+                      src={
+                          comment.author_avatar
+                              ? `http://localhost:8000${comment.author_avatar}`
+                              : default_avatar
+                      }
+                      alt=""
+                      className={style.commentPfp}
+                  />
+
+                  <div className={style.commentText}>
+                      <h2>{comment.author}</h2>
+                      <h3>
+                          {new Date(comment.created_at)
+                              .toLocaleDateString("ru-RU")}
+                      </h3>
+
+                      <p>{comment.content}</p>
+
+                      {Number(comment.author_id) === Number(currentUser.id) && (
+                        <button
+                            onClick={() =>
+                                handleDeleteComment(comment.id)
+                            }
+                        >
+                            Удалить
+                        </button>
+                      )}
+                  </div>
+              </div>
           </div>
-        </div>
+      ))}
         
       </InfoArea>
     </Main>

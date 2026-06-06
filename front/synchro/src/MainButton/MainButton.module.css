@@ -6,7 +6,7 @@ button{
 .MainButton{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
     padding: 12px 24px;
     font-size: 24px;
@@ -14,6 +14,18 @@ button{
     box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
     border-radius: 18px;
     border: none;
+    max-width: 200px;
+    
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.ButtonText{
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
 }
 .NavButton{
      display: flex;

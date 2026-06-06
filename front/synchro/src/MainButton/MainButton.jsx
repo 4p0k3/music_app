@@ -9,12 +9,12 @@ function MainButton({text,type="button", buttonType,callback, className}){
 if (type == "main"){
 
     return(
-        <button  type = {buttonType} onClick = {callback} className={style.MainButton}><b>{text}</b></button>
+        <button  type = {buttonType} onClick = {callback} className={style.MainButton}><b className={style.ButtonText}>{text}</b></button>
     );
 }
 else if (type == "nav"){
     return(
-        <button type = {buttonType} onClick = {callback} className={style.NavButton}><b>{text}</b></button>
+        <button type = {buttonType} onClick = {callback} className={style.NavButton}><b className={style.ButtonText}>{text}</b></button>
     );
 }
 

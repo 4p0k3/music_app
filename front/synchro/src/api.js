@@ -1,5 +1,3 @@
-const API_URL = "http://localhost:8000/api";
-
 export async function getUserById(id) {
     const response = await fetch(
         `http://localhost:8000/api/user/${id}`
@@ -14,18 +12,201 @@ export async function getUserById(id) {
     return data;
 }
 
-export async function register(username, display_name, password) {
-    const response = await fetch("http://localhost:8000/api/register", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            username,
-            display_name,
-            password
-        })
-    });
+export async function register(
+    username,
+    display_name,
+    password,
+    avatarFile
+) {
+    const formData = new FormData();
+
+    formData.append("username", username);
+    formData.append("display_name", display_name);
+    formData.append("password", password);
+
+    if (avatarFile) {
+        formData.append("avatar", avatarFile);
+    }
+
+    const response = await fetch(
+        "http://localhost:8000/api/register",
+        {
+            method: "POST",
+            body: formData
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    return data;
+}
+
+export async function login(username, password) {
+    const response = await fetch(
+        "http://localhost:8000/api/login",
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                username,
+                password,
+            }),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", data.id); // ← добавить
+
+    return data;
+}
+export async function createPost(title, content, genre, imageFile) {
+    const token = localStorage.getItem("token");
+
+    const formData = new FormData();
+    console.log("TOKEN:", token);
+    formData.append("title", title);
+    formData.append("content", content);
+    formData.append("genre", genre);
+
+    if (imageFile) {
+        formData.append("image", imageFile);
+    }
+
+    const response = await fetch(
+        "http://localhost:8000/api/posts",
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`
+            },
+            body: formData
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    return data;
+}
+export async function getPostById(id) {
+    const response = await fetch(
+        `http://localhost:8000/api/posts/${id}`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    return data;
+}
+export async function getUserPosts(id) {
+    const response = await fetch(
+        `http://localhost:8000/api/user/${id}/posts`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    return data;
+}
+export async function getPosts() {
+    const response = await fetch("http://localhost:8000/api/posts");
+
+    if (!response.ok) {
+        throw new Error("Ошибка загрузки постов");
+    }
+
+    return response.json();
+}
+export async function toggleLike(postId) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+        `http://localhost:8000/api/posts/${postId}/like`,
+        {
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    if (!response.ok) {
+        throw new Error("Ошибка лайка");
+    }
+
+    return response.json();
+}
+export async function getComments(postId) {
+    const response = await fetch(
+        `http://localhost:8000/api/posts/${postId}/comments`
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    return data;
+}
+
+export async function createComment(postId, content) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+        `http://localhost:8000/api/posts/${postId}/comments`,
+        {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ content }),
+        }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.error);
+    }
+
+    return data;
+}
+
+export async function deleteComment(commentId) {
+    const token = localStorage.getItem("token");
+
+    const response = await fetch(
+        `http://localhost:8000/api/comments/${commentId}`,
+        {
+            method: "DELETE",
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
 
     const data = await response.json();
 

@@ -24,6 +24,7 @@
     font-size: 24px;
     color: #696969;
     font-weight: normal;
+    width: 700px;
 
 }
 .UserProfilePfp{
@@ -33,7 +34,7 @@
     
 
 }
-.UserSettingsButton{
+.UserLogoutButton{
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -46,8 +47,8 @@
     border: none;
   
 }
-.UserSettingsIcon{
-      height: 48px;
+.UserLogoutIcon{
+    height: 48px;
     width: 48px;
 }
 .UserButtonsWrapper{
@@ -69,4 +70,25 @@
     justify-content: center;
     align-items: center;
     gap: 20px;
+}
+
+.genresCreatePostContainer{
+    display: flex;
+    flex-wrap: wrap;
+    width: 300px;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.genresCreatePostItem{
+    margin-top: 4px;
+    padding: 16px;
+    border-radius: 16px;
+    white-space: nowrap;
+    
+}
+.genresCreatePostItem:hover{
+    background-color: #f5f5f5;
+    cursor: pointer;
 }

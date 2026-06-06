@@ -69,18 +69,56 @@ if (strpos($uri, $basePath) === 0) {
 
 // Регистрация
 if ($method === 'POST' && $uri === '/register') {
-    $username = trim($input['username'] ?? '');
-    $displayName = trim($input['display_name'] ?? '');
-    $password = $input['password'] ?? '';
+
+    $username = trim($_POST['username'] ?? '');
+    $displayName = trim($_POST['display_name'] ?? '');
+    $password = $_POST['password'] ?? '';
 
     if (empty($username) || empty($password) || empty($displayName)) {
         response(["error" => "Заполните все поля"], 400);
     }
+
+    $avatarUrl = null;
+
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+
+        $uploadDir = __DIR__ . '/view/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0755, true);
+        }
+
+        $fileExt = strtolower(pathinfo($_FILES['avatar']['name'], PATHINFO_EXTENSION));
+
+        $newFileName = uniqid('avatar_') . '.' . $fileExt;
+
+        if (move_uploaded_file(
+            $_FILES['avatar']['tmp_name'],
+            $uploadDir . $newFileName
+        )) {
+            $avatarUrl = '/view/' . $newFileName;
+        }
+    }
+
     $hash = password_hash($password, PASSWORD_DEFAULT);
+
     try {
-        $stmt = $pdo->prepare("INSERT INTO users (username, display_name, password_hash) VALUES (?, ?, ?)");
-        $stmt->execute([$username, $displayName, $hash]);
-        response(["message" => "Пользователь зарегистрирован"], 201);
+
+        $stmt = $pdo->prepare("
+            INSERT INTO users
+            (username, display_name, password_hash, avatar_url)
+            VALUES (?, ?, ?, ?)
+        ");
+
+        $stmt->execute([
+            $username,
+            $displayName,
+            $hash,
+            $avatarUrl
+        ]);
+
+        response(["message" => "Пользователь зарегистрирован", 201]);
+
     } catch (PDOException $e) {
         response(["error" => "Пользователь уже существует"], 409);
     }
@@ -101,7 +139,9 @@ if ($method === 'POST' && $uri === '/login') {
         }
         $token = bin2hex(random_bytes(32));
         $pdo->prepare("UPDATE users SET api_token = ?, last_login_at = CURRENT_TIMESTAMP WHERE id = ?")->execute([$token, $user['id']]);
-        response(["token" => $token]);
+        response(["token" => $token,"id" => $user["id"]]);
+        
+        
     }
     response(["error" => "Неверный логин или пароль"], 401);
 }
@@ -114,7 +154,8 @@ if ($method === 'GET' && $uri === '/user') {
         "username" => $user['username'],
         "display_name" => $user['display_name'],
         "avatar_url" => $user['avatar_url'],
-        "role_id" => (int)$user['role_id']
+        "role_id" => (int)$user['role_id'],
+        "created_at" => $user['created_at']
     ]);
 }
 
@@ -270,25 +311,60 @@ if ($method === 'POST' && $uri === '/posts') {
 }
 
 // Получить один пост
+// Получить один пост
 if ($method === 'GET' && preg_match('#^/posts/(\d+)$#', $uri, $matches)) {
-    $user = getAuthUser($pdo);
-    $userId = $user ? (int)$user['id'] : 0;
-    $postId = $matches[1];
+
+    $postId = (int)$matches[1];
 
     $stmt = $pdo->prepare("
-        SELECT p.id, p.title, p.content, p.genre, p.image_path, p.likes_count, p.comments_count, p.created_at, u.username as author,
-               CASE WHEN ? > 0 AND EXISTS(SELECT 1 FROM likes WHERE user_id = ? AND post_id = p.id) THEN 1 ELSE 0 END as is_liked
-        FROM posts p 
-        JOIN users u ON p.author_id = u.id 
-        WHERE p.id = ? AND p.status_id = 2 AND p.deleted_at IS NULL AND u.deleted_at IS NULL AND u.is_banned = 0
+        SELECT
+            p.id,
+            p.author_id,
+            p.title,
+            p.content,
+            p.genre,
+            p.image_path,
+            p.likes_count,
+            p.comments_count,
+            p.created_at,
+
+            u.username,
+            u.display_name,
+            u.avatar_url
+
+        FROM posts p
+        JOIN users u ON p.author_id = u.id
+
+        WHERE p.id = ?
+        LIMIT 1
     ");
-    $stmt->execute([$userId, $userId, $postId]);
+
+    $stmt->execute([$postId]);
+
     $post = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$post) response(["error" => "Пост не найден"], 404);
-    
-    $post['is_liked'] = (bool)$post['is_liked'];
+
+    if (!$post) {
+        response(["error" => "Пост не найден"], 404);
+    }
+
     response($post);
+}
+
+// Получить посты пользователя
+if ($method === 'GET' && preg_match('#^/user/(\d+)/posts$#', $uri, $matches)) {
+
+    $userId = (int)$matches[1];
+
+    $stmt = $pdo->prepare("
+        SELECT *
+        FROM posts
+        WHERE author_id = ?
+        ORDER BY created_at DESC
+    ");
+
+    $stmt->execute([$userId]);
+
+    response($stmt->fetchAll(PDO::FETCH_ASSOC));
 }
 
 // Удалить пост (Мягкое удаление)
@@ -315,15 +391,35 @@ if ($method === 'DELETE' && preg_match('#^/posts/(\d+)$#', $uri, $matches)) {
 
 // Получить комментарии поста
 if ($method === 'GET' && preg_match('#^/posts/(\d+)/comments$#', $uri, $matches)) {
+
+    $postId = (int)$matches[1];
+
     $stmt = $pdo->prepare("
-        SELECT c.id, c.content, c.created_at, u.username as author, u.avatar_url as author_avatar
-        FROM comments c 
-        JOIN users u ON c.author_id = u.id 
-        WHERE c.post_id = ? AND c.deleted_at IS NULL AND u.deleted_at IS NULL AND u.is_banned = 0
+        SELECT
+            c.id,
+            c.content,
+            c.created_at,
+
+            u.id as author_id,
+            u.username as author,
+            u.avatar_url as author_avatar
+
+        FROM comments c
+        JOIN users u ON c.author_id = u.id
+
+        WHERE c.post_id = ?
+        AND c.deleted_at IS NULL
+        AND u.deleted_at IS NULL
+        AND u.is_banned = 0
+
         ORDER BY c.created_at ASC
     ");
-    $stmt->execute([$matches[1]]);
-    response($stmt->fetchAll(PDO::FETCH_ASSOC));
+
+    $stmt->execute([$postId]);
+
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    response($comments);
 }
 
 // Написать комментарий
@@ -431,15 +527,17 @@ if ($method === 'POST' && preg_match('#^/posts/(\d+)/like$#', $uri, $matches)) {
 // Получить публичный профиль пользователя по ID
 if ($method === 'GET' && preg_match('#^/user/(\d+)$#', $uri, $matches)) {
     $stmt = $pdo->prepare("
-        SELECT id, username, display_name, avatar_url 
-        FROM users 
+        SELECT id, username, display_name, avatar_url, created_at
+        FROM users
         WHERE id = ? AND deleted_at IS NULL AND is_banned = 0
         LIMIT 1
     ");
     $stmt->execute([$matches[1]]);
     $profile = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$profile) response(["error" => "Пользователь не найден или заблокирован"], 404);
+    if (!$profile) {
+        response(["error" => "Пользователь не найден или заблокирован"], 404);
+    }
 
     $profile['id'] = (int)$profile['id'];
     response($profile);

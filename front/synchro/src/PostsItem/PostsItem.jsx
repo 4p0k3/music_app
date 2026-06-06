@@ -1,18 +1,13 @@
 import style from './PostsItem.module.css';
 import { useNavigate } from 'react-router-dom';
 
-function PostsItem({cover="https://placehold.co/150x200", header="header", nickname="nickname", date="01.01.2000", content="Content", type = "side"}){
-    let PostsItemCover=cover;
-    let PostsItemHeader=header;
-    let PostsItemNickname=nickname;
-    let PostsItemDate=date;
-    let PostsItemContent=content;
+function PostsItem({id,cover = "https://placehold.co/150x150",header = "header",nickname = "nickname",date = "01.01.2000",content = "Content",likes = 0,genre = "",type = "side",callback}){
     let PostsItemStyle = style.SidePostsItem;
 
     const navigate = useNavigate();
 
     const NavigatePost = () =>{
-        navigate("/Post")
+        navigate(`/Post/${id}`);
     }
 
         switch (type){
@@ -26,12 +21,12 @@ function PostsItem({cover="https://placehold.co/150x200", header="header", nickn
         return(
                 <li className={PostsItemStyle} onClick={NavigatePost}>
                 <div className={style.PostsCoverContainer}>
-                    <img className = {style.PostsCover} src={PostsItemCover} alt="Обложка Релиза" />
+                    <img className = {style.PostsCover} src={cover} alt="Обложка Релиза" />
                 </div>
                 <span className={style.PostsItemInfo}>
-                    <h2 className={style.PostsItemHeader}>{PostsItemHeader}</h2>
-                    <h3>@{PostsItemNickname} | {PostsItemDate} | Лайки: 67 | Жанр: Hyperpop</h3>
-                    <p className={style.PostsItemContent}>{PostsItemContent}</p>
+                    <h2 className={style.PostsItemHeader}>{header}</h2>
+                    <h3>@{nickname} | {date} | Лайки: {likes} | Жанр: {genre}</h3>
+                    <p className={style.PostsItemContent}>{content}</p>
                     
                     
                 </span>
