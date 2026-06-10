@@ -65,17 +65,12 @@ async function handleCreatePost(e) {
     }
     
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const editModalPopupOpen = () => {
-        setNewUsername(user.username);
-        setNewDisplayName(user.display_name);
-        setEditModalOpen(true);
-    };
     const editModalPopupClose = () =>{
         setEditModalOpen(false);
     }
     const [newUsername, setNewUsername] = useState("");
     const [newDisplayName, setNewDisplayName] = useState("");
-    async function handleEditProfile(e) {
+  async function handleEditProfile(e) {
         e.preventDefault();
 
         try {
@@ -83,9 +78,12 @@ async function handleCreatePost(e) {
             formData.append("username", newUsername);
             formData.append("display_name", newDisplayName);
 
+            if (newAvatar) {
+                formData.append("avatar", newAvatar);
+            }
+
             const result = await updateUser(formData);
 
-            // обновляем UI без перезагрузки
             setUser((prev) => ({
                 ...prev,
                 username: result.user.username,
@@ -98,6 +96,13 @@ async function handleCreatePost(e) {
             console.error(error);
         }
     }
+    const [newAvatar, setNewAvatar] = useState(null);
+        const editModalPopupOpen = () => {
+        setNewUsername(user.username);
+        setNewDisplayName(user.display_name);
+        setNewAvatar(null);
+        setEditModalOpen(true);
+    };
     //DELETE OWN POST
     async function handleDeletePost(postId) {
         try {
@@ -168,6 +173,7 @@ async function handleCreatePost(e) {
                             onChange={(e) => setNewUsername(e.target.value)}
                             minLength={5}
                             maxLength={30}
+                            required={false}
                         />
 
                         <InputField
@@ -176,8 +182,14 @@ async function handleCreatePost(e) {
                             onChange={(e) => setNewDisplayName(e.target.value)}
                             minLength={5}
                             maxLength={30}
+                            required={false}
                         />
-
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg"
+                            onChange={(e) => setNewAvatar(e.target.files[0])}
+                            required={false}
+                        />
                         <MainButton
                             buttonType="submit"
                             text="Изменить"
