@@ -40,7 +40,13 @@ function Home() {
 
         loadPosts();
     }, []);
-
+    //название страницы
+    try{
+    document.title = "SYNCHRO";
+    } 
+    catch(error){
+      console.log(error)
+    }
     return (
         <>
             <Header />

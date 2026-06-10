@@ -1,4 +1,5 @@
-import { getUserById, getUserPosts, createPost } from "../api";
+
+import { getUserById, getUserPosts, createPost, updateUser, deletePost } from "../api";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from 'react';
@@ -13,6 +14,7 @@ import MainButton from '../MainButton/MainButton';
 import SignInModal from '../SingInModal/SignInModal';
 import InputField from '../InputField/InputField';
 import logout from "../assets/logout.svg";
+import edit from "../assets/edit.svg";
 import default_avatar from "../assets/default_avatar.svg"
 
 
@@ -61,9 +63,53 @@ async function handleCreatePost(e) {
     const modalPopupClose = () =>{
         setModalOpen(false);
     }
-
     
+    const [editModalOpen, setEditModalOpen] = useState(false);
+    const editModalPopupOpen = () => {
+        setNewUsername(user.username);
+        setNewDisplayName(user.display_name);
+        setEditModalOpen(true);
+    };
+    const editModalPopupClose = () =>{
+        setEditModalOpen(false);
+    }
+    const [newUsername, setNewUsername] = useState("");
+    const [newDisplayName, setNewDisplayName] = useState("");
+    async function handleEditProfile(e) {
+        e.preventDefault();
 
+        try {
+            const formData = new FormData();
+            formData.append("username", newUsername);
+            formData.append("display_name", newDisplayName);
+
+            const result = await updateUser(formData);
+
+            // обновляем UI без перезагрузки
+            setUser((prev) => ({
+                ...prev,
+                username: result.user.username,
+                display_name: result.user.display_name,
+                avatar_url: result.user.avatar_url,
+            }));
+
+            setEditModalOpen(false);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    //DELETE OWN POST
+    async function handleDeletePost(postId) {
+        try {
+            await deletePost(postId);
+
+            // убираем пост из UI без перезагрузки
+            setPosts((prev) => prev.filter((p) => p.id !== postId));
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
     // GET USER
     const [posts, setPosts] = useState([]);
     const { id } = useParams();
@@ -84,7 +130,13 @@ async function handleCreatePost(e) {
 
     loadUser();
 }, [id]);
-
+    //название страницы
+    try{
+    document.title = user.display_name;
+    } 
+    catch(error){
+      console.log(error)
+    }
     //CHECK USER ENDPOINT
     if (!user) {
     return <div>Загрузка...</div>;
@@ -106,9 +158,37 @@ async function handleCreatePost(e) {
               
             <Header/>
             <Main>
+            {/* EDIT PROFILE */}
+            {editModalOpen && (
+                <SignInModal label="Изменить данные" onClose={editModalPopupClose}>
+                    <form onSubmit={handleEditProfile} className={style.CreatePostContent}>
+                        <InputField
+                            placeholder="Юзернейм"
+                            value={newUsername}
+                            onChange={(e) => setNewUsername(e.target.value)}
+                            minLength={5}
+                            maxLength={30}
+                        />
+
+                        <InputField
+                            placeholder="Отображаемое имя"
+                            value={newDisplayName}
+                            onChange={(e) => setNewDisplayName(e.target.value)}
+                            minLength={5}
+                            maxLength={30}
+                        />
+
+                        <MainButton
+                            buttonType="submit"
+                            text="Изменить"
+                            type="main"
+                        />
+                    </form>
+                </SignInModal>
+            )}  
                 {/* CREATE POST */}
                 {(modalOpen && 
-                <SignInModal label="Создать пост" onClose={modalPopupClose}>
+                <SignInModal label="Создать пост" onClose={modalPopupClose} >
     <form
         onSubmit={handleCreatePost}
         className={style.CreatePostContent}
@@ -165,8 +245,20 @@ async function handleCreatePost(e) {
                             <div className={style.UserButtonsWrapper}>
                                 <button
                                     className={style.UserLogoutButton}
+                                    onClick={editModalPopupOpen}
+                                >
+                                
+                                    <img
+                                        src={edit}
+                                        alt=""
+                                        className={style.UserLogoutIcon}
+                                    />
+                                </button>
+                                <button
+                                    className={style.UserLogoutButton}
                                     onClick={handleLogout}
                                 >
+                                
                                     <img
                                         src={logout}
                                         alt=""
@@ -187,8 +279,8 @@ async function handleCreatePost(e) {
                         )}
                     <InfoArea label="Посты пользователя">
                         {posts.map((post) => (
+                        <div key={post.id} className={style.PostWrapper}>
                             <PostsItem
-                                key={post.id}
                                 id={post.id}
                                 cover={
                                     post.image_path
@@ -203,7 +295,16 @@ async function handleCreatePost(e) {
                                 genre={post.genre}
                                 type="main"
                             />
-                        ))}
+
+                            {isOwnProfile && (
+                                <button
+                                    onClick={() => handleDeletePost(post.id)}
+                                >
+                                    Удалить
+                                </button>
+                            )}
+                        </div>
+                    ))}
                     </InfoArea>   
                 </div>   
             </Main>

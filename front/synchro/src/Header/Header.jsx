@@ -1,3 +1,4 @@
+
 import { register, login, getUserById } from "../api";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -13,8 +14,25 @@ import logo from "../assets/SynchroLogo/synchro_black.svg"
 
 function Header(){
 
-    
+    //GENRE DROPDOWN
+    function navigateGenre(genre) {
+        navigate(`/AllPosts?genre=${encodeURIComponent(genre)}`);
+        setGenresDropdown(false);
+    }
+    //SEARCH
+    const [search, setSearch] = useState("");
+    function handleSearch(e) {
+        e.preventDefault();
 
+        if (!search.trim()) {
+            navigate("/AllPosts");
+            return;
+        }
+
+        navigate(
+            `/AllPosts?search=${encodeURIComponent(search)}`
+        );
+    }
     //MODAL OPEN/CLOSE
     const [modalLoginOpen, setModalLoginOpen] = useState(false);
     const modalLoginPopupOpen = () =>{
@@ -146,7 +164,12 @@ function Header(){
         <header>
             <div className={style.HeaderContent}>
                 <img src={logo} alt="SYNCHRO" onClick={NavigateHome} className={style.headerLogo}/>
-                <SearchBar/>
+                <form onSubmit={handleSearch}>
+                    <SearchBar
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                    />
+                </form>
                 <MainButton callback={currentUser? () => navigate(`/User/${currentUser.id}`): modalLoginPopupOpen} text={currentUser? currentUser.display_name: "Вход"} type="main"/>
             </div>
             <nav>
@@ -157,22 +180,45 @@ function Header(){
                     {(isGenresDropdownOpen &&
                         <div className={style.genresDropdown}>
                             <InfoArea label = "Жанры">
-                                <div className={style.genresDropdownItem}>
+                                <div
+                                    className={style.genresDropdownItem}
+                                    onClick={() => navigateGenre("Поп")}
+                                >
                                     <h2>Поп</h2>
                                 </div>
-                                <div className={style.genresDropdownItem}>
+
+                                <div
+                                    className={style.genresDropdownItem}
+                                    onClick={() => navigateGenre("Хип-Хоп")}
+                                >
                                     <h2>Хип-Хоп</h2>
                                 </div>
-                                <div className={style.genresDropdownItem}>
+
+                                <div
+                                    className={style.genresDropdownItem}
+                                    onClick={() => navigateGenre("Рок")}
+                                >
                                     <h2>Рок</h2>
                                 </div>
-                                <div className={style.genresDropdownItem}>
+
+                                <div
+                                    className={style.genresDropdownItem}
+                                    onClick={() => navigateGenre("EDM")}
+                                >
                                     <h2>EDM</h2>
                                 </div>
-                                <div className={style.genresDropdownItem}>
+
+                                <div
+                                    className={style.genresDropdownItem}
+                                    onClick={() => navigateGenre("R&B")}
+                                >
                                     <h2>R&B</h2>
                                 </div>
-                                <div className={style.genresDropdownItem}>
+
+                                <div
+                                    className={style.genresDropdownItem}
+                                    onClick={() => navigateGenre("Hyperpop")}
+                                >
                                     <h2>Hyperpop</h2>
                                 </div>
                             </InfoArea>
@@ -188,7 +234,7 @@ function Header(){
         {(modalLoginOpen && 
         <SignInModal label="Вход" onClose={() => {modalLoginPopupClose(); setPasswordWarning(false)}}>
             <form onSubmit={handleLogin} className={signInModalStyle.inputContainer}>
-                <InputField placeholder="Логин" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} maxLength={30}/>
+                <InputField placeholder="Логин" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} minLength={5} maxLength={30}/>
                 <InputField placeholder="Пароль" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} minLength={8}/>
                 {(isPasswordWrong && 
                     <p>Неверный логин или пароль!</p>
@@ -206,7 +252,7 @@ function Header(){
         <SignInModal label="Регистрация" onClose={() =>{modalRegistrationPopupClose(); setPasswordConfirm(false); setRegexWarning(false)}}>
         {/* <div className={signInModalStyle.inputContainer}> */}
             <form onSubmit={handleRegister} className={signInModalStyle.inputContainer}>
-                <InputField placeholder="Логин" value={username} onChange={(e) => setUsername(e.target.value)} maxLength={30}/>
+                <InputField placeholder="Логин" value={username} onChange={(e) => setUsername(e.target.value)} minLength={5} maxLength={30}/>
                 <InputField placeholder="Отображаемое имя" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={30}/>
                 <InputField placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} type="password" minLength={8} max/>
                 <InputField placeholder="Подтвердите пароль" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} type="password" minLength={8}/>

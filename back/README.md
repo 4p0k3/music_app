@@ -13,6 +13,7 @@ REST API музыкального форума на PHP + SQLite.
 - Pagination
 - Soft delete
 - Редактирование профиля
+- Административные функции (бан/разбан)
 - SQLite database
 - JSON REST API
 
@@ -64,7 +65,8 @@ project/
 
 ```json
 {
-  "token": "your_token"
+  "token": "your_token",
+  "id": 1
 }
 ```
 
@@ -84,15 +86,16 @@ Authorization: Bearer your_token
 
 Регистрация пользователя.
 
-### JSON
+Принимает `multipart/form-data`.
 
-```json
-{
-  "username": "fox",
-  "password": "123456",
-  "display_name": "Fox"
-}
-```
+### Поля
+
+| Поле | Тип | Обязательно |
+|---|---|---|
+| username | string | ✓ |
+| display_name | string | ✓ |
+| password | string | ✓ |
+| avatar | image | — |
 
 ### Ответ
 
@@ -121,7 +124,8 @@ Authorization: Bearer your_token
 
 ```json
 {
-  "token": "very_long_token"
+  "token": "very_long_token",
+  "id": 1
 }
 ```
 
@@ -131,7 +135,7 @@ Authorization: Bearer your_token
 
 ## GET `/api/user`
 
-Текущий пользователь.
+Текущий пользователь (требует авторизации).
 
 ### Headers
 
@@ -146,8 +150,9 @@ Authorization: Bearer token
   "id": 1,
   "username": "fox",
   "display_name": "Fox",
-  "avatar_url": "/view/upload_xxx.png",
-  "role_id": 1
+  "avatar_url": "/view/avatar_xxx.png",
+  "role_id": 1,
+  "created_at": "2024-01-01 00:00:00"
 }
 ```
 
@@ -155,17 +160,39 @@ Authorization: Bearer token
 
 ## GET `/api/user/{id}`
 
-Публичный профиль пользователя.
+Публичный профиль пользователя. Забаненные и удалённые пользователи не возвращаются.
+
+### Ответ
+
+```json
+{
+  "id": 1,
+  "username": "fox",
+  "display_name": "Fox",
+  "avatar_url": "/view/avatar_xxx.png",
+  "created_at": "2024-01-01 00:00:00"
+}
+```
+
+---
+
+## GET `/api/user/{id}/posts`
+
+Все посты конкретного пользователя (включая удалённые не фильтруются на этом эндпоинте).
+
+### Ответ
+
+Массив постов.
 
 ---
 
 ## POST `/api/user/edit`
 
-Редактирование профиля.
+Редактирование профиля текущего пользователя.
 
 Поддерживает:
-- multipart/form-data
-- application/json
+- `multipart/form-data`
+- `application/json`
 
 ### Поля
 
@@ -175,13 +202,27 @@ Authorization: Bearer token
 | display_name | string |
 | avatar | image |
 
+### Ответ
+
+```json
+{
+  "message": "Профиль успешно обновлен",
+  "user": {
+    "id": 1,
+    "username": "fox",
+    "display_name": "Fox",
+    "avatar_url": "/view/avatar_xxx.png"
+  }
+}
+```
+
 ---
 
 # POSTS
 
 ## GET `/api/posts`
 
-Получить список постов.
+Получить список постов. Возвращает только активные посты (`status_id = 2`) незабаненных пользователей. Если передан токен, в каждом посте присутствует поле `is_liked`.
 
 ### Query params
 
@@ -189,51 +230,91 @@ Authorization: Bearer token
 |---|---|
 | genre | Фильтр по жанру |
 | author_id | ID автора |
-| page | Номер страницы |
-| limit | Лимит |
+| search | Поиск по заголовку и тексту (поддерживает несколько слов) |
+| page | Номер страницы (по умолчанию: 1) |
+| limit | Лимит постов на страницу (по умолчанию: 10, максимум: 100) |
 
 ### Ответ
 
+Массив постов:
+
 ```json
-{
-  "page": 1,
-  "limit": 10,
-  "total": 52,
-  "pages": 6,
-  "data": []
-}
+[
+  {
+    "id": 1,
+    "title": "Заголовок",
+    "content": "Текст",
+    "genre": "Рок",
+    "image_path": "/view/post_xxx.jpg",
+    "likes_count": 5,
+    "comments_count": 2,
+    "created_at": "2024-01-01 00:00:00",
+    "author": "fox",
+    "is_liked": false
+  }
+]
 ```
 
 ---
 
 ## GET `/api/posts/{id}`
 
-Получить один пост.
+Получить один пост. Включает данные автора.
+
+### Ответ
+
+```json
+{
+  "id": 1,
+  "author_id": 1,
+  "title": "Заголовок",
+  "content": "Текст",
+  "genre": "Рок",
+  "image_path": "/view/post_xxx.jpg",
+  "likes_count": 5,
+  "comments_count": 2,
+  "created_at": "2024-01-01 00:00:00",
+  "username": "fox",
+  "display_name": "Fox",
+  "avatar_url": "/view/avatar_xxx.png"
+}
+```
 
 ---
 
 ## POST `/api/posts`
 
-Создать пост.
+Создать пост. Требует авторизации.
 
 ### Поля
 
-| Поле | Тип |
-|---|---|
-| title | string |
-| content | string |
-| genre | string |
-| image | image |
+| Поле | Тип | Обязательно |
+|---|---|---|
+| title | string | ✓ |
+| content | string | ✓ |
+| genre | string | — (по умолчанию: General) |
+| image | image | — |
+
+### Ответ
+
+```json
+{
+  "message": "Пост создан",
+  "id": 1,
+  "genre": "Рок",
+  "image_path": "/view/post_xxx.jpg"
+}
+```
 
 ---
 
 ## DELETE `/api/posts/{id}`
 
-Удаление поста.
+Мягкое удаление поста.
 
 Доступ:
-- автор
-- администратор
+- автор поста
+- пользователь с `role_id >= 2` (модератор/администратор)
 
 ---
 
@@ -241,13 +322,28 @@ Authorization: Bearer token
 
 ## GET `/api/posts/{id}/comments`
 
-Получить комментарии.
+Получить комментарии поста. Комментарии забаненных и удалённых пользователей не возвращаются.
+
+### Ответ
+
+```json
+[
+  {
+    "id": 1,
+    "content": "Крутой пост",
+    "created_at": "2024-01-01 00:00:00",
+    "author_id": 2,
+    "author": "wolf",
+    "author_avatar": "/view/avatar_xxx.png"
+  }
+]
+```
 
 ---
 
 ## POST `/api/posts/{id}/comments`
 
-Создать комментарий.
+Создать комментарий. Требует авторизации.
 
 ### JSON
 
@@ -261,7 +357,7 @@ Authorization: Bearer token
 
 ## DELETE `/api/comments/{id}`
 
-Удалить комментарий.
+Удалить комментарий. Доступ: автор комментария или пользователь с `role_id >= 2`.
 
 ---
 
@@ -269,7 +365,69 @@ Authorization: Bearer token
 
 ## POST `/api/posts/{id}/like`
 
-Поставить/убрать лайк.
+Поставить или убрать лайк (toggle). Требует авторизации.
+
+### Ответ
+
+```json
+{
+  "message": "Лайк поставлен",
+  "is_liked": true,
+  "likes_count": 6
+}
+```
+
+---
+
+# ADMIN
+
+Все эндпоинты требуют авторизации и `role_id >= 2`.
+
+## GET `/api/admin/users`
+
+Список всех незадалённых пользователей.
+
+### Ответ
+
+```json
+[
+  {
+    "id": 1,
+    "username": "fox",
+    "display_name": "Fox",
+    "is_banned": 0,
+    "created_at": "2024-01-01 00:00:00"
+  }
+]
+```
+
+---
+
+## POST `/api/admin/users/{id}/ban`
+
+Забанить пользователя.
+
+### Ответ
+
+```json
+{
+  "message": "Пользователь забанен"
+}
+```
+
+---
+
+## POST `/api/admin/users/{id}/unban`
+
+Разбанить пользователя.
+
+### Ответ
+
+```json
+{
+  "message": "Пользователь разбанен"
+}
+```
 
 ---
 
@@ -304,11 +462,11 @@ Authorization: Bearer token
 # Особенности
 
 - soft delete вместо полного удаления
-- banned users не могут логиниться
-- MIME type validation
-- защита от SQL injection
-- pagination metadata
-- transactions для лайков и комментариев
+- забаненные пользователи не могут логиниться
+- MIME type validation для загружаемых файлов
+- защита от SQL injection через PDO prepared statements
+- транзакции для лайков и комментариев
+- `is_liked` в списке постов при авторизованном запросе
 
 ---
 
@@ -322,6 +480,5 @@ Authorization: Bearer token
 | 401 | Не авторизован |
 | 403 | Доступ запрещён |
 | 404 | Не найдено |
-| 409 | Конфликт |
+| 409 | Конфликт (например, никнейм занят) |
 | 500 | Ошибка сервера |
-

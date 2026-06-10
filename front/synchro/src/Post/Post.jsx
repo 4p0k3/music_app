@@ -71,6 +71,13 @@ function Post() {
     const { id } = useParams();
 
     const [post, setPost] = useState(null);
+    //название страницы
+    try{
+    document.title = "Пост " + post.title;
+    } 
+    catch(error){
+      console.log(error)
+    }
 
     useEffect(() => {
     async function loadPost() {

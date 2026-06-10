@@ -220,7 +220,9 @@ if ($method === 'POST' && $uri === '/user/edit') {
 if ($method === 'GET' && $uri === '/posts') {
     $genre = $_GET['genre'] ?? null;
     $authorId = $_GET['author_id'] ?? null;
-    
+    $search = $_GET['search'] ?? null;
+    $artist = $_GET['artist'] ?? null;
+    $release = $_GET['release'] ?? null;
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
     $limit = isset($_GET['limit']) ? max(1, min(100, (int)$_GET['limit'])) : 10;
     $offset = ($page - 1) * $limit;
@@ -242,12 +244,30 @@ if ($method === 'GET' && $uri === '/posts') {
         $sql .= " AND p.genre = ? ";
         $params[] = $genre;
     }
-    
-    if ($authorId) {
+    if ($search) {
+
+        $words = explode(' ', trim($search));
+
+        $conditions = [];
+
+        foreach ($words as $word) {
+
+            $conditions[] = "
+                p.title LIKE ?
+                OR p.content LIKE ?
+            ";
+
+            $params[] = "%$word%";
+            $params[] = "%$word%";
+        }
+
+        $sql .= " AND (" . implode(" OR ", $conditions) . ")";
+    }
+        if ($authorId) {
         $sql .= " AND p.author_id = ? ";
         $params[] = (int)$authorId;
     }
-    
+   
     $sql .= " ORDER BY p.created_at DESC LIMIT " . $limit . " OFFSET " . $offset;
 
     $stmt = $pdo->prepare($sql);
@@ -542,6 +562,56 @@ if ($method === 'GET' && preg_match('#^/user/(\d+)$#', $uri, $matches)) {
     $profile['id'] = (int)$profile['id'];
     response($profile);
 }
+if ($method === 'GET' && $uri === '/admin/users') {
+    $user = requireAuth($pdo);
 
+    // только админ (role_id > 1)
+    if ((int)$user['role_id'] < 2) {
+        response(["error" => "Нет доступа"], 403);
+    }
+
+    $stmt = $pdo->query("
+        SELECT id, username, display_name, is_banned, created_at
+        FROM users
+        WHERE deleted_at IS NULL
+        ORDER BY created_at DESC
+    ");
+
+    response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+if ($method === 'POST' && preg_match('#^/admin/users/(\d+)/ban$#', $uri, $matches)) {
+    $user = requireAuth($pdo);
+
+    if ((int)$user['role_id'] < 2) {
+        response(["error" => "Нет доступа"], 403);
+    }
+
+    $targetId = (int)$matches[1];
+
+    $pdo->prepare("
+        UPDATE users
+        SET is_banned = 1
+        WHERE id = ?
+    ")->execute([$targetId]);
+
+    response(["message" => "Пользователь забанен"]);
+}
+if ($method === 'POST' && preg_match('#^/admin/users/(\d+)/unban$#', $uri, $matches)) {
+    $user = requireAuth($pdo);
+
+    if ((int)$user['role_id'] < 2) {
+        response(["error" => "Нет доступа"], 403);
+    }
+
+    $targetId = (int)$matches[1];
+
+    $pdo->prepare("
+        UPDATE users
+        SET is_banned = 0
+        WHERE id = ?
+    ")->execute([$targetId]);
+
+    response(["message" => "Пользователь разбанен"]);
+}
 // 404 Fallback
 response(["error" => "Эндпоинт не найден"], 404);
