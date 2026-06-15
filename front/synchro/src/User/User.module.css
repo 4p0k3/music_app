@@ -1,101 +1,240 @@
-.UserContainer{
-    display: flex;
+.UserContainer {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+}
+
+.UserInfo {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: flex-start;
+  width: 100%;
+  gap: 24px;
+}
+
+.UserProfilePfp {
+  border-radius: var(--radius-lg);
+  width: 180px;
+  height: 180px;
+  object-fit: cover;
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.UserTextWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+.UserNickname {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.UsernameAndDate {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.UserButtonsWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  width: auto;
+  flex-wrap: wrap;
+}
+
+.UserLogoutButton {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.UserLogoutButton:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+}
+
+.UserLogoutIcon {
+  height: 24px;
+  width: 24px;
+}
+
+.UserSettingsButton:hover {
+  background-color: var(--surface-hover);
+}
+
+.createButtonShadow {
+  box-shadow: var(--shadow-sm);
+}
+
+/* Create post modal */
+.CreatePostContent {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+}
+
+/* Выпадающий список жанра */
+.CreatePostContent select {
+  width: 100%;
+  background-color: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 12px 18px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 0.12s;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236B6B6B' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  padding-right: 40px;
+}
+
+.CreatePostContent select:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(26,26,26,0.08);
+  background-color: var(--surface);
+}
+
+/* Файл */
+.CreatePostContent input[type="file"] {
+  width: 100%;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 10px 0;
+  border-bottom: 1.5px dashed var(--border-strong);
+  border-radius: 0;
+  background: transparent;
+}
+
+.CreatePostContent input[type="file"]::file-selector-button {
+  padding: 6px 14px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-strong);
+  background: var(--surface);
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: all 0.12s;
+}
+
+.CreatePostContent input[type="file"]::file-selector-button:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+.genresCreatePostContainer {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.genresCreatePostItem {
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1.5px solid var(--border);
+  transition: all 0.12s;
+}
+
+.genresCreatePostItem:hover {
+  background-color: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Post row in user list */
+.PostWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.DeletePostBtn {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.DeletePostBtn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .UserInfo {
     flex-direction: column;
-    justify-content: start;
-    align-items:start;
-    gap: 20px;
-
-    
-}
-.UserInfo{
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    justify-content: start;
-    width: 1204px;
-    gap: 20px;
-    
-}
-.UserNickname{
-    font-size: 40px;
-    font-weight: bolder;
-}
-.UsernameAndDate{
-    font-size: 24px;
-    color: #696969;
-    font-weight: normal;
-    width: 700px;
-
-}
-.UserProfilePfp{
-    border-radius: 16px;
-    width: 300px;
-    height: 300px;
-    
-
-}
-.UserButtonsWrapper{
-    display: flex;
-    justify-content: start;
     align-items: center;
-    gap: 16px;
-
-}
-.UserLogoutButton{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
+  }
+  .UserProfilePfp {
+    width: 120px;
+    height: 120px;
+  }
+  .UserTextWrapper {
     align-items: center;
-    padding: 12px 12px;
-    font-size: 24px;
-    background: #E8E8E8;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-    border-radius: 18px;
-    border: none;
-  
-}
-.UserLogoutIcon{
-    height: 48px;
-    width: 48px;
-}
-.UserButtonsWrapper{
-    display: flex;
-    flex-direction: row;
-    justify-content: end;
+    text-align: center;
     width: 100%;
-}
-.UserSettingsButton:hover{
-    background-color: #DFDFDF;
-}
-.createButtonShadow{
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-}
-.CreatePostContent{
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
+  }
+  .UserButtonsWrapper {
     justify-content: center;
-    align-items: center;
-    gap: 20px;
-}
-
-.genresCreatePostContainer{
-    display: flex;
-    flex-wrap: wrap;
-    width: 300px;
-    align-items: center;
-    justify-content: center;
-}
-
-
-.genresCreatePostItem{
-    margin-top: 4px;
-    padding: 16px;
-    border-radius: 16px;
-    white-space: nowrap;
-    
-}
-.genresCreatePostItem:hover{
-    background-color: #f5f5f5;
-    cursor: pointer;
+    width: 100%;
+  }
+  .UserNickname {
+    font-size: 1.3rem;
+  }
 }

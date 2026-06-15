@@ -1,0 +1,11 @@
+@media (max-width: 768px) {
+  header {
+    border-radius: 0;
+  }
+  header nav {
+    gap: 2px;
+    padding: 4px 8px;
+    scrollbar-width: none;
+  }
+  header nav::-webkit-scrollbar { display: none; }
+}

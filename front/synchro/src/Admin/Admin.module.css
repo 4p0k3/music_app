@@ -1,34 +1,307 @@
+/* ── Admin two-panel layout ── */
+.AdminPanels {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start;
+}
 
-.ChooseUserItem{
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    padding: 12px 20px;
+/* Left panel – user list */
+.UserListPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 240px;
+  max-width: 280px;
+  width: 100%;
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  padding: 16px;
+  position: sticky;
+  top: 90px;
 }
-.ChooseUserItem:hover{
-    cursor: pointer;
+
+.PanelHeader {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1.5px solid var(--border);
 }
-.userPfp{
-    height: 52px;
-    width: 52px;
-    border-radius: 10000px;
-    margin-right: 10px;
+
+.PanelTitle {
+  font-size: 1rem;
+  font-weight: 700;
 }
-.postWithButtons{
-    gap: 20px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: start;
+
+.UserCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
-ul{
-    text-decoration: none;
+
+.SearchInput {
+  background-color: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  width: 100%;
+  color: var(--text-primary);
+  transition: border-color 0.12s;
+  -webkit-user-select: text;
+  user-select: text;
 }
-li{
-    text-decoration: none;
+
+.SearchInput:focus {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(26,26,26,0.08);
+  background-color: var(--surface);
 }
-.UserItem{
-    margin-top:10px;
-    cursor:pointer;
+
+.SearchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.StateMsg {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 12px 0;
+}
+
+.UserList {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  list-style: none;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.UserList::-webkit-scrollbar { width: 4px; }
+.UserList::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+
+.UserItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background-color 0.12s;
+  gap: 8px;
+}
+
+.UserItem:hover {
+  background-color: var(--surface-hover);
+}
+
+.UserItemActive {
+  background-color: var(--accent) !important;
+  color: #fff !important;
+}
+
+.UserItemActive .UserItemUsername {
+  color: rgba(255,255,255,0.7) !important;
+}
+
+.UserItemBanned {
+  opacity: 0.6;
+}
+
+.UserItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+
+.UserItemDisplay {
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.UserItemUsername {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.BannedBadge {
+  flex-shrink: 0;
+  background: #fee2e2;
+  color: #dc2626;
+  border-radius: var(--radius-pill);
+  padding: 2px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+/* Right panel – posts */
+.PostsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.PostsSectionTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.PostList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  list-style: none;
+}
+
+.PostItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 4px 12px 4px 4px;
+  transition: box-shadow 0.12s;
+}
+
+.PostItem:hover {
+  box-shadow: var(--shadow-sm);
+}
+
+.PostItem > *:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.DeleteBtn {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+}
+
+.DeleteBtn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+/* Ban button row */
+.BanBtn {
+  margin-top: 4px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.BanBtn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+.UnbanBtn {
+  margin-top: 4px;
+  padding: 6px 16px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  background: transparent;
+  border: 1.5px solid #86efac;
+  border-radius: var(--radius-pill);
+  color: #16a34a;
+  cursor: pointer;
+  transition: all 0.12s;
+}
+
+.UnbanBtn:hover {
+  background-color: #dcfce7;
+}
+
+/* Legacy selectors (kept for backward compat) */
+.ChooseUserItem {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 14px;
+}
+
+.ChooseUserItem:hover { cursor: pointer; }
+
+.userPfp {
+  height: 44px;
+  width: 44px;
+  border-radius: var(--radius-pill);
+  margin-right: 10px;
+  object-fit: cover;
+}
+
+.postWithButtons {
+  gap: 12px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+ul { text-decoration: none; }
+li { text-decoration: none; }
+
+.UserItem { margin-top: 0; cursor: pointer; }
+
+@media (max-width: 900px) {
+  .AdminPanels {
+    flex-direction: column;
+  }
+  .UserListPanel {
+    max-width: 100%;
+    position: static;
+  }
+  .UserList {
+    max-height: 30vh;
+  }
 }

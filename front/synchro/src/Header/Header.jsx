@@ -6,7 +6,6 @@ import style from './Header.module.css';
 import MainButton from '../MainButton/MainButton';
 import SearchBar from '../SearchBar/SearchBar';
 import InputField from '../InputField/InputField';
-import inputFieldStyle from '../InputField/InputField.module.css'
 import SignInModal from '../SingInModal/SignInModal';
 import signInModalStyle from '../SingInModal/SignInModal.module.css';
 import InfoArea from '../InfoArea/InfoArea';
@@ -116,10 +115,6 @@ function Header(){
      const NavigateHome = () =>{
         navigate("/")
     }
-    const NavigateUserProfile = () =>{
-        navigate(`/User/${result.id}`)
-    }
-
     // LOGIN
     const [isPasswordWrong, setPasswordWarning] = useState(false);
     const [currentUser, setCurrentUser] = useState(() => {
@@ -170,7 +165,7 @@ function Header(){
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </form>
-                <MainButton callback={currentUser? () => navigate(`/User/${currentUser.id}`): modalLoginPopupOpen} text={currentUser? currentUser.display_name: "Вход"} type="main"/>
+                <MainButton callback={currentUser? () => navigate(`/User/${currentUser.id}`): modalLoginPopupOpen} text={currentUser? (currentUser.display_name || currentUser.username || 'Профиль'): "Вход"} type="main"/>
             </div>
             <nav>
                 <div className={style.genresDropdownContainer}>
@@ -266,7 +261,7 @@ function Header(){
                  {/* </div> */}
                 
                 
-                <MainButton text="Регистраиця" type="main" buttonType="submit"/>
+                <MainButton text="Регистрация" type="main" buttonType="submit"/>
         </form> 
         <div className={signInModalStyle.modalBottomOptions}>
             <a onClick={() => {modalRegistrationPopupClose(); modalLoginPopupOpen();}}><p>Логин</p></a>

@@ -1,36 +1,52 @@
-.ReleasesItem{
-    max-width: 400px;
-    min-width: 376px;
-    margin: 8px 0px 8px 0px;
-    align-items: center;
-    justify-content: center;
-    line-height: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    padding: 8px;
-    border-radius: 8px;
+.ReleasesItem {
+  width: 100%;
+  margin: 4px 0;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  gap: 12px;
+  transition: background-color 0.12s;
 }
-.ReleasesItem:hover{
-    background-color: #f5f5f5;
-    transition: 0.1s;
-    cursor: pointer;
+
+.ReleasesItem:hover {
+  background-color: var(--surface-hover);
+  cursor: pointer;
 }
-.ReleaseCover{
-    width:80px;
-    height: auto;
-    border-radius: 8px;
-    margin-right: 8px;
+
+.ReleaseCover {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+  box-shadow: var(--shadow-sm);
 }
-.ReleasesItemInfo{
-display: flex;
-flex-direction: column;
-justify-content: space-between;
-align-items: start;    
-gap: 6px;
+
+.ReleasesItemInfo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
 }
-.ReleasesItemName{
-font-size: 20px;
-font-weight: bolder;
+
+.ReleasesItemName {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.ReleasesItemArtist {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

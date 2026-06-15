@@ -1,62 +1,101 @@
-header{
-    background-color: white;
-    width: 100%;
-    border-radius: 0px 0px 16px 16px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-    
-}
-.headerSearch{
-    width: 680px;
-    height: 60px;
-}
-.HeaderContent{
-    border-bottom: 3px solid #E8E8E8;
-    width: 1200px;
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    align-items: center;
-    padding: 8px 0;
-    margin: 0 20px;
-    
+header {
+  background-color: var(--surface);
+  width: 100%;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.headerLogo{
-   cursor: pointer;
-    width: 235px;         /* Уменьшаем ширину, чтобы логотип стал аккуратнее */
-    height: auto;         /* Разрешаем браузеру самому считать высоту */
-    box-sizing: content-box;
-}
-
-nav{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    border-radius: 0px 0px 16px 16px;
-}
-.genresDropdownContainer {
-  position: relative;     
+.HeaderContent {
+  border-bottom: 1.5px solid var(--border);
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
   display: flex;
-    
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  gap: 16px;
+}
+
+.headerSearch {
+  flex: 1;
+  min-width: 0;
+  max-width: 600px;
+}
+
+.headerLogo {
+  cursor: pointer;
+  width: 200px;
+  height: auto;
+  flex-shrink: 0;
+  display: block;
+}
+
+.headerUserBtn {
+  flex-shrink: 0;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+nav {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  width: 100%;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  gap: 4px;
+}
+
+.genresDropdownContainer {
+  position: relative;
+  display: flex;
 }
 
 .genresDropdown {
-  position: absolute;     
-  top: 100%;              
-  left: 0;                
-  z-index: 100;           
-  
-  margin-top: 4px;        
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 200;
+  min-width: 200px;
 }
-.genresDropdownItem{
-    margin-top: 4px;
-    padding: 16px;
-    border-radius: 16px;
-    white-space: nowrap;
-    
+
+.genresDropdownItem {
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.12s;
+  font-size: 0.95rem;
 }
-.genresDropdownItem:hover{
-    background-color: #f5f5f5;
-    cursor: pointer;
+
+.genresDropdownItem:hover {
+  background-color: var(--surface-hover);
+}
+
+@media (max-width: 768px) {
+  .HeaderContent {
+    padding: 8px 12px;
+    gap: 10px;
+  }
+  .headerLogo {
+    width: 130px;
+  }
+  .headerSearch {
+    max-width: unset;
+  }
+  nav {
+    padding: 4px 12px;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
 }

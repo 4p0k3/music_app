@@ -52,59 +52,60 @@ function Home() {
             <Header />
 
             <Main>
-                <InfoArea label="Ожидаемые релизы">
-                    <ReleasesItem
-                        cover="src/ReleasesCovers/2hollis_star.jpg"
-                        artist="2hollis"
-                        name="star"
-                        genre="EDM, hyperpop"
-                    />
-
-                    <ReleasesItem
-                        cover="src/ReleasesCovers/charlixcx_brat.png"
-                        artist="Charli XCX"
-                        name="brat"
-                        genre="electropop, dance-pop, hyperpop"
-                    />
-
-                    <ReleasesItem
-                        cover="src/ReleasesCovers/ogbuda_freerio2.jpg"
-                        artist="OG Buda"
-                        name="FREERIO 2"
-                        genre="Detroit-rap"
-                    />
-
-                    <ReleasesItem
-                        cover="src/ReleasesCovers/PinkPantheress_Fancy_That.png"
-                        artist="PinkPantheress"
-                        name="Fancy That"
-                        genre="UK garage, jungle, dance-pop"
-                    />
-                </InfoArea>
-
-                <InfoArea label="Недавние посты">
-                    {recentPosts.map((post) => (
-                        <PostsItem
-                            key={post.id}
-                            id={post.id}
-                            cover={
-                                post.image_path
-                                    ? `http://localhost:8000${post.image_path}`
-                                    : "https://placehold.co/150x200"
-                            }
-                            header={post.title}
-                            nickname={post.author}
-                            date={new Date(
-                                post.created_at
-                            ).toLocaleDateString("ru-RU")}
-                            content={post.content}
-                            likes={post.likes_count}
-                            genre={post.genre}
-                            type="side"
+                <div className="m-f">
+                    <InfoArea label="Ожидаемые релизы">
+                        <ReleasesItem
+                            cover="src/ReleasesCovers/2hollis_star.jpg"
+                            artist="2hollis"
+                            name="star"
+                            genre="EDM, hyperpop"
                         />
-                    ))}
-                </InfoArea>
 
+                        <ReleasesItem
+                            cover="src/ReleasesCovers/charlixcx_brat.png"
+                            artist="Charli XCX"
+                            name="brat"
+                            genre="electropop, dance-pop, hyperpop"
+                        />
+
+                        <ReleasesItem
+                            cover="src/ReleasesCovers/ogbuda_freerio2.jpg"
+                            artist="OG Buda"
+                            name="FREERIO 2"
+                            genre="Detroit-rap"
+                        />
+
+                        <ReleasesItem
+                            cover="src/ReleasesCovers/PinkPantheress_Fancy_That.png"
+                            artist="PinkPantheress"
+                            name="Fancy That"
+                            genre="UK garage, jungle, dance-pop"
+                        />
+                    </InfoArea>
+
+                    <InfoArea label="Недавние посты">
+                        {recentPosts.map((post) => (
+                            <PostsItem
+                                key={post.id}
+                                id={post.id}
+                                cover={
+                                    post.image_path
+                                        ? `http://localhost:8000${post.image_path}`
+                                        : "https://placehold.co/150x200"
+                                }
+                                header={post.title}
+                                nickname={post.author}
+                                date={new Date(
+                                    post.created_at
+                                ).toLocaleDateString("ru-RU")}
+                                content={post.content}
+                                likes={post.likes_count}
+                                genre={post.genre}
+                                type="side"
+                            />
+                        ))}
+                    </InfoArea>
+                </div>
                 <InfoArea label="Лучшее за месяц">
                     {topPosts.map((post) => (
                         <PostsItem

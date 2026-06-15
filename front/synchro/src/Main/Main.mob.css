@@ -1,0 +1,9 @@
+@media (max-width: 768px) {
+  main {
+    padding: 0 12px;
+    gap: 14px;
+    margin-top: 14px;
+    margin-bottom: 14px;
+    flex-direction: column;
+  }
+}

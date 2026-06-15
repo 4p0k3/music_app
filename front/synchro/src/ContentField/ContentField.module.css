@@ -1,0 +1,55 @@
+.ContentField {
+    width: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ContentTextarea {
+    width: 100%;
+    background-color: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 14px 18px;
+    font-size: 1rem;
+    font-family: inherit;
+    color: var(--text-primary);
+    line-height: 1.6;
+    resize: vertical;
+    min-height: 120px;
+    transition: border-color 0.12s, box-shadow 0.12s;
+    /* разрешаем выделение текста */
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+.ContentTextarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+    background-color: var(--surface);
+}
+
+.ContentTextarea::placeholder {
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+/* Кастомный скроллбар внутри textarea */
+.ContentTextarea::-webkit-scrollbar {
+    width: 4px;
+}
+.ContentTextarea::-webkit-scrollbar-thumb {
+    background: var(--border-strong);
+    border-radius: 2px;
+}
+
+.Counter {
+    align-self: flex-end;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    user-select: none;
+    -webkit-user-select: none;
+    padding-right: 4px;
+}

@@ -1,7 +1,15 @@
-.TextArea{
-    background-color: white;
-    padding: 16px;
-    border-radius: 16px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-    display: inline-block;
+.TextArea {
+  background-color: var(--surface);
+  padding: 16px 20px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: block;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .TextArea {
+    padding: 14px 16px;
+  }
 }

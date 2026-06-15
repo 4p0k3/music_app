@@ -89,7 +89,7 @@ function Admin() {
         <>
             <Header />
             <Main>
-                <TextArea>
+                <div className={style.AdminPanels}>
                 {/* LEFT PANEL — user list */}
 <div className={style.UserListPanel}>
     <div className={style.PanelHeader}>
@@ -142,9 +142,18 @@ function Admin() {
 {/* RIGHT PANEL — POSTS */}
 <div className={style.PostsSection}>
     <h3 className={style.PostsSectionTitle}>
-        Посты пользователя <br/>
-        {!loadingPosts && (
-            <span className={style.UserCount}>{posts.length}</span>
+        Посты пользователя
+        {selectedUser && (
+            <>
+                {' '}<b>{selectedUser.display_name}</b>
+                <span className={style.UserCount}>{posts.length}</span>
+                <button
+                    className={selectedUser.is_banned ? style.UnbanBtn : style.BanBtn}
+                    onClick={() => handleBanToggle(selectedUser)}
+                >
+                    {selectedUser.is_banned ? 'Разбанить' : 'Забанить'}
+                </button>
+            </>
         )}
     </h3>
 
@@ -185,7 +194,7 @@ function Admin() {
         </ul>
     )}
 </div>
-            </TextArea>
+                </div>
             </Main>
             <Footer />
         </>

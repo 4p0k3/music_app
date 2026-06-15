@@ -12,6 +12,7 @@ import Footer from '../Footer/Footer';
 import PostsItem from '../PostsItem/PostsItem';
 import MainButton from '../MainButton/MainButton';
 import SignInModal from '../SingInModal/SignInModal';
+import ContentField from '../ContentField/ContentField';
 import InputField from '../InputField/InputField';
 import logout from "../assets/logout.svg";
 import edit from "../assets/edit.svg";
@@ -120,31 +121,27 @@ async function handleCreatePost(e) {
     const { id } = useParams();
     const [user, setUser] = useState(null);
     useEffect(() => {
-    async function loadUser() {
-        try {
-            const profile = await getUserById(id);
-            setUser(profile);
-
-            const userPosts = await getUserPosts(id);
-            setPosts(userPosts);
-
-        } catch (error) {
-            console.error(error);
+        async function loadUser() {
+            try {
+                const profile = await getUserById(id);
+                setUser(profile);
+                const userPosts = await getUserPosts(id);
+                setPosts(userPosts);
+            } catch (error) {
+                console.error(error);
+            }
         }
-    }
-
-    loadUser();
-}, [id]);
-    //название страницы
+        loadUser();
+    }, [id]);
     try{
-    document.title = user.display_name;
+        document.title = user.display_name;
     } 
     catch(error){
-      console.log(error)
+    //   console.log(error)
     }
     //CHECK USER ENDPOINT
     if (!user) {
-    return <div>Загрузка...</div>;
+        return <div>Загрузка...</div>;
     }
 
     //CHECK USER AVATAR AND SET DEFAULT
@@ -212,10 +209,12 @@ async function handleCreatePost(e) {
             maxLength={30}
         />
 
-        <InputField
+        <ContentField
             placeholder="Текст поста"
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            rows={7}
+            maxLength={5000}
         />
 
         <select value={genre} onChange={(e) => setGenre(e.target.value)} required>
@@ -311,6 +310,7 @@ async function handleCreatePost(e) {
                             {isOwnProfile && (
                                 <button
                                     onClick={() => handleDeletePost(post.id)}
+                                    className={style.DeletePostBtn}
                                 >
                                     Удалить
                                 </button>

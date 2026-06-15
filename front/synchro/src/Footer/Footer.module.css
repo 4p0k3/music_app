@@ -1,17 +1,34 @@
-.footerContainer{
-     padding: 16px;
-    color: white;
-    background-color: #454545;
-    width: 1240px;
-    margin: 0 auto; 
-    
-    border-radius: 16px 16px 0 0;
-    box-sizing: border-box; /* Чтобы padding не раздувал ширину */
+.footerWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: auto;
 }
-.footerWrapper{
-    display: flex;
-    flex-direction: row;
-    justify-content: stretch;
-    align-items: end;
-    height: 200px;
+
+.footerContainer {
+  padding: 18px 24px;
+  color: #AAAAAA;
+  background-color: #1A1A1A;
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+}
+
+.supportMail {
+  color: #AAAAAA;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+@media (max-width: 768px) {
+  .footerContainer {
+    border-radius: 0;
+    padding: 14px 16px;
+    max-width: 100%;
+  }
 }

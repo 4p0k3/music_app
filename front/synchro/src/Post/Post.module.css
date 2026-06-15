@@ -1,116 +1,223 @@
-main{
-    color:#454545;
+main {
+  color: var(--text-primary);
 }
 
-.HeaderContent{
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    align-items: start;
-    justify-content: space-between;
-    width: 100%;
+/* Top section: user info + post image */
+.HeaderContent {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  flex-wrap: wrap;
 }
 
-.PostHeader{
-    display: flex;
-    flex-wrap: wrap;
-    font-size: 36px;
-    font-weight: bolder;
+.HeaderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Author card - standalone clickable card */
+.PostUser {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.12s;
+  width: fit-content;
+}
+
+.PostUser:hover {
+  background-color: var(--surface-hover);
+}
+
+.PostUserPfp {
+  height: 56px;
+  width: 56px;
+  border-radius: var(--radius-pill);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.PostUserText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.PostHeader {
+  font-size: 1.1rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  line-height: 1.3;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.PostDateAndUser {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  font-weight: 400;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Post image */
+.PostImage {
+  max-width: 420px;
+  width: 100%;
+  max-height: 380px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* Post body text */
+.PostContent {
+  width: 100%;
+}
+
+.PostText {
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--text-primary);
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Like bar */
+.likeButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+}
+
+/* Comments */
+.postComment {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.commentWrapper {
+  width: 100%;
+  margin: 4px 0;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  transition: background-color 0.12s;
+  cursor: pointer;
+}
+
+.commentWrapper:hover {
+  background-color: var(--surface-hover);
+}
+
+/* Строка: аватар | текст | кнопка */
+.commentContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.commentPfp {
+  height: 44px;
+  width: 44px;
+  border-radius: var(--radius-pill);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.commentText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.commentText h2 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.commentText h3 {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.commentText p {
+  font-size: 0.93rem;
+  color: var(--text-primary);
+  line-height: 1.5;
+  margin-top: 2px;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Кнопка удалить — сбоку от текста, не растянута */
+.deleteCommentBtn {
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 2px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  background: transparent;
+  border: 1.5px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.12s;
+  opacity: 0;
+}
+
+.commentWrapper:hover .deleteCommentBtn {
+  opacity: 1;
+}
+
+.deleteCommentBtn:hover {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .HeaderContent {
+    flex-direction: column;
+  }
+  .PostImage {
     max-width: 100%;
-    word-break: break-all; 
-    overflow-wrap: anywhere;
-    line-clamp: 4;
-}
-.PostUser{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    cursor: pointer;
-}
-.PostUserText{
-    display: flex;
+    max-height: 260px;
+  }
+  .postComment {
     flex-direction: column;
-    justify-content: center;
-    align-items: start;
-}
-.PostDateAndUser{
-    font-size: 18px;
-    color: #696969;
-    font-weight: normal;
-}
-.PostUserPfp{
-    height: 72px;
-    width: 72px;
-    border-radius: 10000px;
-
-}
-.PostImage{
-
-    min-height: 400px;
-    max-width: 500px;
-    max-height: 400px;
-    border-radius: 16px;
-    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.15);
-}
-.HeaderInfo{
-    display: flex;
-    flex-direction: column;
-    align-items: start;
-    justify-content: space-between;
-    gap: 20px;
-}
-.PostText{
-    font-size: 24px;
-    line-height: 28px;
-
-}
-.likeButton{
+  }
+  .postComment > * {
     width: 100%;
-    display: flex;
-    gap: 10px;
-}
-.commentPfp{
-    height: 64px;
-    border-radius: 10000px;
-}
-.commentContainer{
-    display: flex;
-    flex-direction: row;
-    align-items: start;
-    justify-content: start;
-    gap: 10px;
-}
-.commentWrapper{
-    
-    min-width: 376px;
-    margin: 8px 0px 8px 0px;
-    align-items: center;
-    justify-content: center;
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    padding: 8px;
-    border-radius: 16px;
-    h3{
-        font-size: 18px;
-        color: #696969;
-        font-weight: normal;
-    }
-}
-.commentWrapper:hover{
-    background-color: #f5f5f5;
-    transition: 0.1s;
-    cursor: pointer;
-}    
-
-.postComment{
-    display: flex;
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    margin-top: 10px;
-    gap:10px;
+  }
 }

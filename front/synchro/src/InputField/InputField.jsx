@@ -1,11 +1,19 @@
 import style from './InputField.module.css';
-function InputField({placeholder,onChange, type="text", minLength=3, maxLength, required=true}){
-    let InputFieldPlaceHolder = placeholder;
-    return(
-        <div className={style.InputField}>
 
-            <input type={type} placeholder = {InputFieldPlaceHolder} onChange={onChange} required={required} minLength={minLength} maxLength={maxLength}/>
-        </div>
-    );
+function InputField({ placeholder, value, onChange, type = "text", minLength = 3, maxLength, required = true }) {
+  return (
+    <div className={style.InputField}>
+      <input
+        type={type}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        required={required}
+        minLength={minLength}
+        maxLength={maxLength}
+      />
+    </div>
+  );
 }
+
 export default InputField;

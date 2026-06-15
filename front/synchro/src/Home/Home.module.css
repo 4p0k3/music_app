@@ -1,0 +1,13 @@
+.homeColumns {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+  width: 100%;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .homeColumns {
+    flex-direction: column;
+  }
+}
