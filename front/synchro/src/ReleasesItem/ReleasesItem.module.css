@@ -11,10 +11,6 @@
   transition: background-color 0.12s;
 }
 
-.ReleasesItem:hover {
-  background-color: var(--surface-hover);
-}
-
 .ReleaseCover {
   width: 56px;
   height: 56px;
