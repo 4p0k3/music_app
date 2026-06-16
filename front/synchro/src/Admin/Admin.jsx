@@ -30,6 +30,7 @@ function Admin() {
     const [relName, setRelName] = useState('');
     const [relGenre, setRelGenre] = useState('');
     const [relCover, setRelCover] = useState(null);
+    const [releaseError, setReleaseError] = useState(""); // Стейт для ошибки при добавлении релиза
 
     // Инициализация данных при монтировании
     useEffect(() => {
@@ -100,6 +101,7 @@ function Admin() {
     // Добавление нового релиза через FormData
     async function handleAddRelease(e) {
         e.preventDefault();
+        setReleaseError(""); // Очищаем ошибку перед отправкой
         
         const formData = new FormData();
         formData.append('artist', relArtist);
@@ -123,7 +125,8 @@ function Admin() {
             e.target.reset(); // Сбрасываем элемент input[type=file]
         } catch (err) {
             console.error("Ошибка при создании релиза:", err);
-            alert("Не удалось добавить релиз. Проверьте заполнение полей.");
+            // Устанавливаем текст ошибки в стейт вместо alert
+            setReleaseError(err.message || "Не удалось добавить релиз. Проверьте заполнение полей.");
         }
     }
 
@@ -238,6 +241,7 @@ function Admin() {
                         )}
                     </div>
 
+                    {/* ПРАВАЯ ПАНЕЛЬ — Ожидаемые релизы */}
                     <div className={style.PostsSection}>
                         <h3 className={style.PostsSectionTitle}>
                             Ожидаемые релизы
@@ -277,6 +281,14 @@ function Admin() {
                                     style={{ color: '#fff' }}
                                 />
                             </div>
+
+                            {/* Вывод ошибки формы */}
+                            {releaseError && (
+                                <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>
+                                    {releaseError}
+                                </p>
+                            )}
+
                             <button 
                                 type="submit" 
                                 className={style.BanBtn} 

@@ -1,4 +1,3 @@
-
 import { getUserById, getUserPosts, createPost, updateUser, deletePost } from "../api";
 import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
@@ -18,9 +17,6 @@ import logout from "../assets/logout.svg";
 import edit from "../assets/edit.svg";
 import default_avatar from "../assets/default_avatar.svg"
 
-
-
-
 function User(){
     //LOGOUT
     const navigate = useNavigate();
@@ -35,44 +31,50 @@ function User(){
     const [content, setContent] = useState("");
     const [genre, setGenre] = useState("");
     const [image, setImage] = useState(null);
+    const [postError, setPostError] = useState("");
 
-async function handleCreatePost(e) {
-    e.preventDefault();
+    async function handleCreatePost(e) {
+        e.preventDefault();
+        setPostError("");
+        try {
+            const result = await createPost(
+                title,
+                content,
+                genre,
+                image
+            );
 
-    try {
-        const result = await createPost(
-            title,
-            content,
-            genre,
-            image
-        );
-
-        modalPopupClose();
-
-        // перейти на страницу нового поста
-        navigate(`/Post/${result.id}`);
-
-    } catch (error) {
-        console.error(error);
+            modalPopupClose();
+            navigate(`/Post/${result.id}`);
+        } catch (error) {
+            setPostError(error.message || "Ошибка при создании поста");
+        }
     }
-}
 
     const [modalOpen, setModalOpen] = useState(false);
-    const modalPopupOpen = () =>{
+    const modalPopupOpen = () => {
+        setPostError("");
         setModalOpen(true);
     }
-    const modalPopupClose = () =>{
+    const modalPopupClose = () => {
+        setPostError("");
         setModalOpen(false);
     }
     
     const [editModalOpen, setEditModalOpen] = useState(false);
-    const editModalPopupClose = () =>{
+    const editModalPopupClose = () => {
+        setEditError("");
         setEditModalOpen(false);
     }
+    
     const [newUsername, setNewUsername] = useState("");
     const [newDisplayName, setNewDisplayName] = useState("");
-  async function handleEditProfile(e) {
+    const [newAvatar, setNewAvatar] = useState(null);
+    const [editError, setEditError] = useState("");
+
+    async function handleEditProfile(e) {
         e.preventDefault();
+        setEditError("");
 
         try {
             const formData = new FormData();
@@ -94,32 +96,33 @@ async function handleCreatePost(e) {
 
             setEditModalOpen(false);
         } catch (error) {
-            console.error(error);
+            setEditError(error.message || "Ошибка при обновлении профиля");
         }
     }
-    const [newAvatar, setNewAvatar] = useState(null);
-        const editModalPopupOpen = () => {
+
+    const editModalPopupOpen = () => {
         setNewUsername(user.username);
         setNewDisplayName(user.display_name);
         setNewAvatar(null);
+        setEditError("");
         setEditModalOpen(true);
     };
+    
     //DELETE OWN POST
     async function handleDeletePost(postId) {
         try {
             await deletePost(postId);
-
-            // убираем пост из UI без перезагрузки
             setPosts((prev) => prev.filter((p) => p.id !== postId));
-
         } catch (error) {
             console.error(error);
         }
     }
+    
     // GET USER
     const [posts, setPosts] = useState([]);
     const { id } = useParams();
     const [user, setUser] = useState(null);
+    
     useEffect(() => {
         async function loadUser() {
             try {
@@ -133,12 +136,14 @@ async function handleCreatePost(e) {
         }
         loadUser();
     }, [id]);
+    
     try{
         document.title = user.display_name;
     } 
     catch(error){
     //   console.log(error)
     }
+    
     //CHECK USER ENDPOINT
     if (!user) {
         return <div>Загрузка...</div>;
@@ -150,96 +155,105 @@ async function handleCreatePost(e) {
     //HIDE BUTTONS
     const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
 
-    const isOwnProfile =
-        Number(currentUser.id) === Number(id);
+    const isOwnProfile = Number(currentUser.id) === Number(id);
 
-    const lorem = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam aliquid odio ab, officiis adipisci accusamus ipsam itaque voluptatum quae odit commodi similique repellendus eos saepe! Nobis assumenda quisquam mollitia ipsa!";
     return(
-        
         <>
-              
             <Header/>
             <Main>
-            {/* EDIT PROFILE */}
-            {editModalOpen && (
-                <SignInModal label="Изменить данные" onClose={editModalPopupClose}>
-                    <form onSubmit={handleEditProfile} className={style.CreatePostContent}>
-                        <InputField
-                            placeholder="Юзернейм"
-                            value={newUsername}
-                            onChange={(e) => setNewUsername(e.target.value)}
-                            minLength={5}
-                            maxLength={30}
-                            required={false}
-                        />
+                {/* EDIT PROFILE */}
+                {editModalOpen && (
+                    <SignInModal label="Изменить данные" onClose={editModalPopupClose}>
+                        <form onSubmit={handleEditProfile} className={style.CreatePostContent}>
+                            <InputField
+                                placeholder="Юзернейм"
+                                value={newUsername}
+                                onChange={(e) => setNewUsername(e.target.value)}
+                                minLength={5}
+                                maxLength={30}
+                                required={false}
+                            />
 
-                        <InputField
-                            placeholder="Отображаемое имя"
-                            value={newDisplayName}
-                            onChange={(e) => setNewDisplayName(e.target.value)}
-                            minLength={5}
-                            maxLength={30}
-                            required={false}
-                        />
-                        <input
-                            type="file"
-                            accept="image/png, image/jpeg"
-                            onChange={(e) => setNewAvatar(e.target.files[0])}
-                            required={false}
-                        />
-                        <MainButton
-                            buttonType="submit"
-                            text="Изменить"
-                            type="main"
-                        />
-                    </form>
-                </SignInModal>
-            )}  
+                            <InputField
+                                placeholder="Отображаемое имя"
+                                value={newDisplayName}
+                                onChange={(e) => setNewDisplayName(e.target.value)}
+                                minLength={5}
+                                maxLength={30}
+                                required={false}
+                            />
+                            <input
+                                type="file"
+                                accept="image/png, image/jpeg"
+                                onChange={(e) => setNewAvatar(e.target.files[0])}
+                                required={false}
+                            />
+                            
+                            {/* Вывод ошибки профиля */}
+                            {editError && (
+                                <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>
+                                    {editError}
+                                </p>
+                            )}
+
+                            <MainButton
+                                buttonType="submit"
+                                text="Изменить"
+                                type="main"
+                            />
+                        </form>
+                    </SignInModal>
+                )}  
+                
                 {/* CREATE POST */}
-                {(modalOpen && 
-                <SignInModal label="Создать пост" onClose={modalPopupClose} >
-    <form
-        onSubmit={handleCreatePost}
-        className={style.CreatePostContent}
-    >
-        <InputField
-            placeholder="Заголовок поста"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            maxLength={30}
-        />
+                {modalOpen && (
+                    <SignInModal label="Создать пост" onClose={modalPopupClose} >
+                        <form onSubmit={handleCreatePost} className={style.CreatePostContent}>
+                            <InputField
+                                placeholder="Заголовок поста"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                maxLength={30}
+                            />
 
-        <ContentField
-            placeholder="Текст поста"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            rows={7}
-            maxLength={5000}
-        />
+                            <ContentField
+                                placeholder="Текст поста"
+                                value={content}
+                                onChange={(e) => setContent(e.target.value)}
+                                rows={7}
+                                maxLength={5000}
+                            />
 
-        <select value={genre} onChange={(e) => setGenre(e.target.value)} required>
-            <option value="">Выберите жанр</option>
-            <option value="Поп">Поп</option>
-            <option value="Хип-Хоп">Хип-Хоп</option>
-            <option value="Рок">Рок</option>
-            <option value="EDM">EDM</option>
-            <option value="R&B">R&B</option>
-            <option value="Hyperpop">Hyperpop</option>
-        </select>
+                            <select value={genre} onChange={(e) => setGenre(e.target.value)} required>
+                                <option value="">Выберите жанр</option>
+                                <option value="Поп">Поп</option>
+                                <option value="Хип-Хоп">Хип-Хоп</option>
+                                <option value="Рок">Рок</option>
+                                <option value="EDM">EDM</option>
+                                <option value="R&B">R&B</option>
+                                <option value="Hyperpop">Hyperpop</option>
+                            </select>
 
-        <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-        />
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => setImage(e.target.files[0])}
+                            />
+                            
+                            {/* Вывод ошибки создания поста */}
+                            {postError && (
+                                <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>
+                                    {postError}
+                                </p>
+                            )}
 
-        <MainButton
-            text="Создать"
-            type="main"
-            buttonType="submit"
-        />
-    </form>
-</SignInModal>
+                            <MainButton
+                                text="Создать"
+                                type="main"
+                                buttonType="submit"
+                            />
+                        </form>
+                    </SignInModal>
                 )}
 
                 <div className={style.UserContainer}>
@@ -258,7 +272,6 @@ async function handleCreatePost(e) {
                                     className={style.UserLogoutButton}
                                     onClick={editModalPopupOpen}
                                 >
-                                
                                     <img
                                         src={edit}
                                         alt=""
@@ -269,7 +282,6 @@ async function handleCreatePost(e) {
                                     className={style.UserLogoutButton}
                                     onClick={handleLogout}
                                 >
-                                
                                     <img
                                         src={logout}
                                         alt=""
@@ -278,16 +290,17 @@ async function handleCreatePost(e) {
                                 </button>
                             </div>
                         )}
-
                     </TextArea>
-                        {isOwnProfile && (
-                            <MainButton
-                                text="Создать пост"
-                                type="main"
-                                className={style.CreatePostButton}
-                                callback={modalPopupOpen}
-                            />
-                        )}
+                    
+                    {isOwnProfile && (
+                        <MainButton
+                            text="Создать пост"
+                            type="main"
+                            className={style.CreatePostButton}
+                            callback={modalPopupOpen}
+                        />
+                    )}
+                    
                     <InfoArea label="Посты пользователя">
                         {posts.map((post) => (
                         <div key={post.id} className={style.PostWrapper}>

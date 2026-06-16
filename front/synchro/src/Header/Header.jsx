@@ -1,4 +1,3 @@
-
 import { register, login, getUserById } from "../api";
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,6 +17,7 @@ function Header(){
         navigate(`/AllPosts?genre=${encodeURIComponent(genre)}`);
         setGenresDropdown(false);
     }
+    
     //SEARCH
     const [search, setSearch] = useState("");
     function handleSearch(e) {
@@ -32,20 +32,28 @@ function Header(){
             `/AllPosts?search=${encodeURIComponent(search)}`
         );
     }
+    
     //MODAL OPEN/CLOSE
     const [modalLoginOpen, setModalLoginOpen] = useState(false);
     const modalLoginPopupOpen = () =>{
+        setLoginError(""); // Очищаем ошибку при открытии
         setModalLoginOpen(true);
     }
     const modalLoginPopupClose = () =>{
         setModalLoginOpen(false);
+        setLoginError("");
     }
+    
     const [modalRegistrationOpen, setModalRegistrationOpen] = useState(false);
     const modalRegistrationPopupOpen = () =>{
+        setRegisterError(""); // Очищаем ошибку при открытии
         setModalRegistrationOpen(true);
     }
     const modalRegistrationPopupClose = () =>{
         setModalRegistrationOpen(false);
+        setRegisterError("");
+        setRegexWarning(false);
+        setPasswordMatchWarning(false);
     }
 
     // REGISTRATION
@@ -56,27 +64,24 @@ function Header(){
     const [passwordsMatchWarning, setPasswordMatchWarning] = useState(false);
     const [regexWarning, setRegexWarning] = useState(false);
     const [avatar, setAvatar] = useState(null);
+    const [registerError, setRegisterError] = useState(""); // Стейт для ошибки сервера при регистрации
 
     async function handleRegister(e) {
         e.preventDefault();
-
-        console.log("username:", username);
+        setRegisterError(""); // Очищаем предыдущую ошибку сервера
         
         if (/[а-яёА-ЯЁ]/.test(password) || /[а-яёА-ЯЁ]/.test(username)) {
             setRegexWarning(true);
             return;
-        }
-        else{
+        } else {
             setRegexWarning(false);
             if (password !== passwordConfirm) {
                 setPasswordMatchWarning(true);
                 return;
-            }
-            else{
+            } else {
                 setPasswordMatchWarning(false);
             }
         }
-        
         
         try {
             await register(
@@ -87,21 +92,19 @@ function Header(){
             );
 
             const result = await login(
-            username,
-            password
+                username,
+                password
             );
 
             navigate(`/User/${result.id}`);
-
-            console.log(result.message);
             modalRegistrationPopupClose();
 
         } catch (error) {
-            console.log(error.message);
+            console.error("REGISTRATION ERROR:", error);
+            // Выводим ошибку бэкенда в форму
+            setRegisterError(error.message || "Ошибка при регистрации");
         }
-        
     }
-    
 
     const [isGenresDropdownOpen, setGenresDropdown] = useState(false);
     const genresDropdownToggle = () =>{
@@ -112,47 +115,46 @@ function Header(){
     const NavigateAllPosts = () =>{
         navigate("/AllPosts")
     }
-     const NavigateHome = () =>{
+    const NavigateHome = () =>{
         navigate("/")
     }
+    
     // LOGIN
-    const [isPasswordWrong, setPasswordWarning] = useState(false);
+    const [loginError, setLoginError] = useState(""); // Стейт для ошибки сервера при логине
     const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem("user");
-    return saved ? JSON.parse(saved) : null;
+        const saved = localStorage.getItem("user");
+        return saved ? JSON.parse(saved) : null;
     });
     const [loginUsername, setLoginUsername] = useState("");
     const [loginPassword, setLoginPassword] = useState("");
 
- async function handleLogin(e) {
-    e.preventDefault();
+    async function handleLogin(e) {
+        e.preventDefault();
+        setLoginError(""); // Очищаем предыдущую ошибку сервера
 
-    try {
-        const result = await login(
-            loginUsername,
-            loginPassword  
-        );
-        setPasswordWarning(false);
+        try {
+            const result = await login(
+                loginUsername,
+                loginPassword  
+            );
 
-        const user = await getUserById(result.id);
+            const user = await getUserById(result.id);
 
-        localStorage.setItem(
-            "user",
-            JSON.stringify(user)
-        );
+            localStorage.setItem(
+                "user",
+                JSON.stringify(user)
+            );
 
-        setCurrentUser(user);
+            setCurrentUser(user);
+            modalLoginPopupClose();
+            navigate(`/User/${result.id}`);
 
-        modalLoginPopupClose();
-
-        navigate(`/User/${result.id}`);
-
-    } catch (error) {
-        console.error("LOGIN ERROR:", error);
-        
-        setPasswordWarning(true);
+        } catch (error) {
+            console.error("LOGIN ERROR:", error);
+            // Выводим ошибку бэкенда в форму
+            setLoginError(error.message || "Неверный логин или пароль");
+        }
     }
-}
 
     return(
         <>
@@ -227,49 +229,59 @@ function Header(){
         
         {/* LOGIN MODAL */}
         {(modalLoginOpen && 
-        <SignInModal label="Вход" onClose={() => {modalLoginPopupClose(); setPasswordWarning(false)}}>
+        <SignInModal label="Вход" onClose={modalLoginPopupClose}>
             <form onSubmit={handleLogin} className={signInModalStyle.inputContainer}>
                 <InputField placeholder="Логин" value={loginUsername} onChange={(e) => setLoginUsername(e.target.value)} minLength={5} maxLength={30}/>
                 <InputField placeholder="Пароль" type="password" value={loginPassword} onChange={(e) => setLoginPassword(e.target.value)} minLength={8}/>
-                {(isPasswordWrong && 
-                    <p>Неверный логин или пароль!</p>
-                )}
-                <MainButton text="Вход" type="main" buttonType="submit"/>
                 
+                {/* Вывод ошибки логина */}
+                {(loginError && 
+                    <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>
+                        {loginError}
+                    </p>
+                )}
+                
+                <MainButton text="Вход" type="main" buttonType="submit"/>
             </form>  
-        <div className={signInModalStyle.modalBottomOptions}>
-            <a><p onClick={() => {modalRegistrationPopupOpen(); modalLoginPopupClose();}}>Регистрация</p></a>
-        </div>
+            <div className={signInModalStyle.modalBottomOptions}>
+                <a><p onClick={() => {modalRegistrationPopupOpen(); modalLoginPopupClose();}}>Регистрация</p></a>
+            </div>
         </SignInModal>
         )}
+
         {/* REGISTRATION MODAL */}
         {(modalRegistrationOpen && 
-        <SignInModal label="Регистрация" onClose={() =>{modalRegistrationPopupClose(); setPasswordConfirm(false); setRegexWarning(false)}}>
-        {/* <div className={signInModalStyle.inputContainer}> */}
+        <SignInModal label="Регистрация" onClose={modalRegistrationPopupClose}>
             <form onSubmit={handleRegister} className={signInModalStyle.inputContainer}>
                 <InputField placeholder="Логин" value={username} onChange={(e) => setUsername(e.target.value)} minLength={5} maxLength={30}/>
                 <InputField placeholder="Отображаемое имя" value={displayName} onChange={(e) => setDisplayName(e.target.value)} maxLength={30}/>
-                <InputField placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} type="password" minLength={8} max/>
+                <InputField placeholder="Пароль" value={password} onChange={(e) => setPassword(e.target.value)} type="password" minLength={8}/>
                 <InputField placeholder="Подтвердите пароль" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} type="password" minLength={8}/>
+                
+                {/* Локальные предупреждения */}
                 {(passwordsMatchWarning &&
-                    <p>Пароли не совпадают!</p>
+                    <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>Пароли не совпадают!</p>
                 )}
                 {(regexWarning &&
-                    <p>Используйте только латиницу, цифры и спецсимволы!</p>
+                    <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>Используйте только латиницу, цифры и спецсимволы!</p>
                 )}         
-                <input type = "file" accept="image/png, image/jpeg" onChange={(e) => setAvatar(e.target.files[0])}/>
-                 {/* </div> */}
                 
-                
+                <input type="file" accept="image/png, image/jpeg" onChange={(e) => setAvatar(e.target.files[0])}/>
+                 
+                {/* Вывод серверной ошибки при регистрации */}
+                {(registerError &&
+                    <p style={{ color: '#ff4d4f', margin: '5px 0', fontSize: '14px', textAlign: 'center' }}>{registerError}</p>
+                )}
+
                 <MainButton text="Регистрация" type="main" buttonType="submit"/>
-        </form> 
-        <div className={signInModalStyle.modalBottomOptions}>
-            <a onClick={() => {modalRegistrationPopupClose(); modalLoginPopupOpen();}}><p>Логин</p></a>
-        </div>
+            </form> 
+            <div className={signInModalStyle.modalBottomOptions}>
+                <a onClick={() => {modalRegistrationPopupClose(); modalLoginPopupOpen();}}><p>Логин</p></a>
+            </div>
         </SignInModal>
         )}
         </>
     );
-    
 }
+
 export default Header;
