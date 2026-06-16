@@ -259,33 +259,31 @@ if ($method === 'GET' && $uri === '/user') {
 // ── Редактировать профиль ────────────────────────────────────
 if ($method === 'POST' && $uri === '/user/edit') {
     $user = requireAuth($pdo);
-
     $username    = trim($_POST['username']     ?? $input['username']     ?? '');
     $displayName = trim($_POST['display_name'] ?? $input['display_name'] ?? '');
-
-    // Если поле не передано – оставляем текущее
     if ($username    === '') $username    = $user['username'];
     if ($displayName === '') $displayName = $user['display_name'];
-
-    // Валидация, только если значение изменилось
     if ($username !== $user['username']) {
         if ($err = validateUsername($username)) response(['error' => $err], 422);
     }
     if ($err = validateDisplayName($displayName)) response(['error' => $err], 422);
-
     $avatarUrl = $user['avatar_url'];
+    $oldAvatarPath = null;
     if (!empty($_FILES['avatar']) && $_FILES['avatar']['error'] !== UPLOAD_ERR_NO_FILE) {
         $avatarUrl = saveUploadedImage($_FILES['avatar'], 'avatar_');
-        unlink($user['avatar_url']);
+        if (!empty($user['avatar_url'])) {
+            $oldAvatarPath = __DIR__ . '/' . ltrim($user['avatar_url'], '/');
+        }
     }
-
     try {
         $pdo->prepare('
             UPDATE users
             SET username = ?, display_name = ?, avatar_url = ?, updated_at = CURRENT_TIMESTAMP
             WHERE id = ?
         ')->execute([$username, $displayName, $avatarUrl, $user['id']]);
-
+        if ($oldAvatarPath && file_exists($oldAvatarPath) && is_file($oldAvatarPath)) {
+            unlink($oldAvatarPath);
+        }
         response([
             'message' => 'Профиль успешно обновлён',
             'user'    => [
@@ -299,7 +297,6 @@ if ($method === 'POST' && $uri === '/user/edit') {
         response(['error' => 'Этот никнейм уже занят'], 409);
     }
 }
-
 // ════════════════════════════════════════════════════════════
 //  POSTS
 // ════════════════════════════════════════════════════════════
