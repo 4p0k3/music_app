@@ -1,6 +1,9 @@
 header {
   background-color: var(--surface);
   width: 100%;
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow-md);
 }

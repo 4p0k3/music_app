@@ -8,16 +8,6 @@ function ReleasesItem({
     genre = "Genre"
 }) {
 
-    const navigate = useNavigate();
-
-    const handleClick = () => {
-        navigate(
-            `/AllPosts?search=${encodeURIComponent(
-                `${artist} ${name}`
-            )}`
-        );
-    };
-
     let ReleaseCover = cover;
     let ReleaseArtist = artist;
     let ReleaseName = name;
@@ -26,7 +16,6 @@ function ReleasesItem({
     return(
         <li
             className={style.ReleasesItem}
-            onClick={handleClick}
         >
             <img
                 className={style.ReleaseCover}
