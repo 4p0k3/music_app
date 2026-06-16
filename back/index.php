@@ -393,6 +393,59 @@ if ($method === 'GET' && $uri === '/posts') {
     response($posts);
 }
 
+// ════════════════════════════════════════════════════════════
+//  RELEASES (ОЖИДАЕМЫЕ РЕЛИЗЫ)
+// ════════════════════════════════════════════════════════════
+
+// ── Получить список ожидаемых релизов (доступно всем) ───────
+if ($method === 'GET' && $uri === '/releases') {
+    $stmt = $pdo->query('SELECT * FROM expected_releases ORDER BY created_at DESC');
+    response($stmt->fetchAll(PDO::FETCH_ASSOC));
+}
+
+// ── Добавить новый релиз (только админ/модератор) ───────────
+if ($method === 'POST' && $uri === '/admin/releases') {
+    $user = requireAuth($pdo);
+    if ((int)$user['role_id'] < 2) response(['error' => 'Нет доступа'], 403);
+    $artist = trim($_POST['artist'] ?? '');
+    $name   = trim($_POST['name'] ?? '');
+    $genre  = trim($_POST['genre'] ?? '');
+    if ($artist === '' || $name === '') {
+        response(['error' => 'Заполните поля Артист и Название'], 400);
+    }
+    $coverPath = null;
+    if (!empty($_FILES['cover']) && $_FILES['cover']['error'] !== UPLOAD_ERR_NO_FILE) {
+        $coverPath = saveUploadedImage($_FILES['cover'], 'release_');
+    }
+    $stmt = $pdo->prepare('INSERT INTO expected_releases (artist, name, genre, cover_path) VALUES (?, ?, ?, ?)');
+    $stmt->execute([$artist, $name, $genre, $coverPath]);
+    response([
+        'message' => 'Релиз добавлен',
+        'id'      => (int)$pdo->lastInsertId()
+    ], 201);
+}
+
+// ── Удалить релиз (только админ/модератор) ──────────────────
+if ($method === 'DELETE' && preg_match('#^/admin/releases/(\d+)$#', $uri, $m)) {
+    $user = requireAuth($pdo);
+    if ((int)$user['role_id'] < 2) response(['error' => 'Нет доступа'], 403);
+    $releaseId = (int)$m[1];
+    $stmt = $pdo->prepare('SELECT cover_path FROM expected_releases WHERE id = ?');
+    $stmt->execute([$releaseId]);
+    $release = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$release) {
+        response(['error' => 'Релиз не найден'], 404);
+    }
+    $pdo->prepare('DELETE FROM expected_releases WHERE id = ?')->execute([$releaseId]);
+    if (!empty($release['cover_path'])) {
+        $filePath = __DIR__ . '/' . ltrim($release['cover_path'], '/');        
+        if (file_exists($filePath) && is_file($filePath)) {
+            unlink($filePath);
+        }
+    }
+    response(['message' => 'Релиз и обложка успешно удалены']);
+}
+
 // ── Создать пост ─────────────────────────────────────────────
 if ($method === 'POST' && $uri === '/posts') {
     $user = requireAuth($pdo);

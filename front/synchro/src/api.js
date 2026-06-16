@@ -324,3 +324,37 @@ export async function unbanUser(userId) {
     if (!res.ok) throw new Error(data.error);
     return data;
 }
+
+// Получить все релизы
+export async function getReleases() {
+    const res = await fetch('http://localhost:8000/api/releases');
+    if (!res.ok) throw new Error('Ошибка загрузки релизов');
+    return res.json();
+}
+
+// Добавить релиз (через FormData, так как есть картинка)
+export async function addRelease(formData) {
+    const token = localStorage.getItem('token'); // или откуда ты берешь токен
+    const res = await fetch('http://localhost:8000/api/admin/releases', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: formData,
+    });
+    if (!res.ok) throw new Error('Ошибка добавления релиза');
+    return res.json();
+}
+
+// Удалить релиз
+export async function deleteRelease(id) {
+    const token = localStorage.getItem('token');
+    const res = await fetch(`http://localhost:8000/api/admin/releases/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+    if (!res.ok) throw new Error('Ошибка удаления релиза');
+    return res.json();
+}

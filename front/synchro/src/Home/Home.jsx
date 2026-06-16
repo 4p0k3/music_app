@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getPosts } from "../api";
+import { getPosts, getReleases } from "../api"; // Импортируем функцию getReleases
 
 import Header from "../Header/Header";
 import Main from "../Main/Main";
@@ -11,42 +11,45 @@ import Footer from "../Footer/Footer";
 function Home() {
     const [recentPosts, setRecentPosts] = useState([]);
     const [topPosts, setTopPosts] = useState([]);
+    const [releases, setReleases] = useState([]); // Стейт для динамических релизов
 
     useEffect(() => {
-        async function loadPosts() {
+        async function loadData() {
             try {
-                const posts = await getPosts();
+                // Параллельная загрузка постов и релизов
+                const [posts, releasesData] = await Promise.all([
+                    getPosts(),
+                    getReleases()
+                ]);
 
-                // 5 последних
+                // 5 последних постов
                 const recent = [...posts]
-                    .sort(
-                        (a, b) =>
-                            new Date(b.created_at) -
-                            new Date(a.created_at)
-                    )
+                    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
                     .slice(0, 5);
 
-                // 5 лучших по лайкам
+                // 5 лучших постов по лайкам
                 const top = [...posts]
                     .sort((a, b) => b.likes_count - a.likes_count)
                     .slice(0, 5);
 
                 setRecentPosts(recent);
                 setTopPosts(top);
+                setReleases(releasesData);
             } catch (error) {
-                console.error(error);
+                console.error("Ошибка при загрузке данных на главной:", error);
             }
         }
 
-        loadPosts();
+        loadData();
     }, []);
-    //название страницы
-    try{
-    document.title = "SYNCHRO";
-    } 
-    catch(error){
-      console.log(error)
+
+    // Название страницы
+    try {
+        document.title = "SYNCHRO";
+    } catch(error) {
+        console.log(error);
     }
+
     return (
         <>
             <Header />
@@ -54,33 +57,25 @@ function Home() {
             <Main>
                 <div className="m-f">
                     <InfoArea label="Ожидаемые релизы">
-                        <ReleasesItem
-                            cover="src/ReleasesCovers/2hollis_star.jpg"
-                            artist="2hollis"
-                            name="star"
-                            genre="EDM, hyperpop"
-                        />
-
-                        <ReleasesItem
-                            cover="src/ReleasesCovers/charlixcx_brat.png"
-                            artist="Charli XCX"
-                            name="brat"
-                            genre="electropop, dance-pop, hyperpop"
-                        />
-
-                        <ReleasesItem
-                            cover="src/ReleasesCovers/ogbuda_freerio2.jpg"
-                            artist="OG Buda"
-                            name="FREERIO 2"
-                            genre="Detroit-rap"
-                        />
-
-                        <ReleasesItem
-                            cover="src/ReleasesCovers/PinkPantheress_Fancy_That.png"
-                            artist="PinkPantheress"
-                            name="Fancy That"
-                            genre="UK garage, jungle, dance-pop"
-                        />
+                        {releases.length > 0 ? (
+                            releases.map((release) => (
+                                <ReleasesItem
+                                    key={release.id}
+                                    cover={
+                                        release.cover_path
+                                            ? `http://localhost:8000${release.cover_path}`
+                                            : "https://placehold.co/150x150"
+                                    }
+                                    artist={release.artist}
+                                    name={release.name}
+                                    genre={release.genre || "Разное"}
+                                />
+                            ))
+                        ) : (
+                            <p style={{ padding: "15px", color: "#888", textAlign: "center" }}>
+                                Нет ожидаемых релизов
+                            </p>
+                        )}
                     </InfoArea>
 
                     <InfoArea label="Недавние посты">
@@ -95,9 +90,7 @@ function Home() {
                                 }
                                 header={post.title}
                                 nickname={post.author}
-                                date={new Date(
-                                    post.created_at
-                                ).toLocaleDateString("ru-RU")}
+                                date={new Date(post.created_at).toLocaleDateString("ru-RU")}
                                 content={post.content}
                                 likes={post.likes_count}
                                 genre={post.genre}
@@ -106,6 +99,7 @@ function Home() {
                         ))}
                     </InfoArea>
                 </div>
+                
                 <InfoArea label="Лучшее за месяц">
                     {topPosts.map((post) => (
                         <PostsItem
@@ -118,9 +112,7 @@ function Home() {
                             }
                             header={post.title}
                             nickname={post.author}
-                            date={new Date(
-                                post.created_at
-                            ).toLocaleDateString("ru-RU")}
+                            date={new Date(post.created_at).toLocaleDateString("ru-RU")}
                             content={post.content}
                             likes={post.likes_count}
                             genre={post.genre}

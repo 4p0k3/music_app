@@ -50,6 +50,16 @@ CREATE TABLE IF NOT EXISTS posts (
     FOREIGN KEY (status_id) REFERENCES post_statuses (id) ON DELETE RESTRICT
 );
 
+-- Таблица expected_releases (Ожидаемые релизы)
+CREATE TABLE IF NOT EXISTS expected_releases (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    artist TEXT NOT NULL,
+    name TEXT NOT NULL,
+    genre TEXT NOT NULL,
+    cover_path TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- Таблица comments
 CREATE TABLE IF NOT EXISTS comments (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -99,7 +109,8 @@ CREATE INDEX IF NOT EXISTS idx_likes_user_post ON likes (user_id, post_id);
 -- Тестовые данные для музыкального форума
 INSERT OR IGNORE INTO users (id, username, display_name, password_hash, role_id) VALUES 
     (1, 'audiophile99', 'Alex', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1), -- Пароль: password
-    (2, 'basshead', 'Max', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1);
+    (2, 'basshead', 'Max', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 1),
+    (3, 'admin', 'AdMin', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 2);
 
 INSERT OR IGNORE INTO posts (id, author_id, title, content, genre, image_path, status_id, likes_count, comments_count) VALUES 
     (1, 1, 'Настройка ViPER4Android', 'Ребят, кто как настраивает ViPER4Android для наушников KZ? Пытаюсь выжать максимум из звучания.', 'Audio', NULL, 2, 1, 1);
