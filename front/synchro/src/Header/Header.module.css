@@ -3,9 +3,6 @@ header {
   width: 100%;
   border-radius: 0 0 var(--radius-lg) var(--radius-lg);
   box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 0;
-  z-index: 100;
 }
 
 .HeaderContent {
